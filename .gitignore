@@ -10,4 +10,9 @@
 # Maven noise
 target
 
+# Eclipse noise
+.project
+.settings
+.classpath
+
 # project specific
