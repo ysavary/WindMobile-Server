@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+    <!-- Should not be used -->
+    <defaultCache
+        eternal="false"
+        maxElementsInMemory="100"
+        timeToLiveSeconds="60"
+        overflowToDisk="false">
+    </defaultCache>       
+
+    <!-- Datas -->
+    <!--  48 + 12 hours for values (max chart scale + a night), past datas never change -->
+    <cache name="datas"
+        eternal="false"
+        maxElementsInMemory="10000"
+        timeToLiveSeconds="216000"
+        overflowToDisk="false">
+    </cache>   
+
+    <!-- 1 hour for station infos -->
+    <cache name="stationInfos"
+        eternal="false"
+        maxElementsInMemory="1000"
+        timeToLiveSeconds="3600"
+        overflowToDisk="false">
+    </cache>    
+        
+    <!--  Query caches -->  
+    <!-- Hibernate query cache timestamps -->   
+    <cache name="org.hibernate.cache.UpdateTimestampsCache"
+        eternal="true"
+        maxElementsInMemory="10000"
+        overflowToDisk="false">
+    </cache>
+    
+    <!-- Default hibernate query cache, should not be used -->   
+    <cache name="org.hibernate.cache.StandardQueryCache"
+        eternal="false"
+        maxElementsInMemory="100"
+        timeToLiveSeconds="60"        
+        overflowToDisk="false">
+    </cache>
+    
+    <!-- 4 minutes for data queries -->
+    <cache name="dataQueries"
+        eternal="false"
+        maxElementsInMemory="100"
+        timeToLiveSeconds="240"
+        overflowToDisk="false">
+    </cache>     
+</ehcache>

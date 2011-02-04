@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="jdcJdbcDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />
+        <property name="jdbcUrl" value="${jdc.jdbc.url}" />
+        <property name="user" value="${jdc.jdbc.username}" />
+        <property name="password" value="${jdc.jdbc.password}" />
+
+        <property name="minPoolSize" value="1" />
+        <property name="initialPoolSize" value="1" />
+        <property name="acquireIncrement" value="2" />
+        <property name="maxPoolSize" value="10" />
+        <property name="maxIdleTime" value="14400" />
+        <property name="idleConnectionTestPeriod" value="1800" />
+    </bean>
+
+    <bean id="jdcHibernateSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <property name="dataSource" ref="jdcJdbcDataSource" />
+        <property name="mappingResources">
+            <list>
+                <value>ch/windmobile/server/jdc/Data.hbm.xml</value>
+                <value>ch/windmobile/server/jdc/Station.hbm.xml</value>
+                <value>ch/windmobile/server/jdc/Sensor.hbm.xml</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.EhCacheRegionFactory</prop>
+                <prop key="hibernate.cache.use_query_cache">true</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">ch/windmobile/server/jdc/ehcache.xml</prop>
+
+                <!-- Does not work: instead change the logger level "org.hibernate.SQL.level = FINE"
+                <prop key="hibernate.show_sql">false</prop> -->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="jdcDataSource" class="ch.windmobile.server.jdc.JdcDataSource">
+        <constructor-arg name="sessionFactory" ref="jdcHibernateSessionFactory" />
+    </bean>
+</beans>

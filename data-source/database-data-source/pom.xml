@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>WindMobile :: Server :: Database data source</name>
+    <description>Contains all the database data sources</description>
+
+    <groupId>ch.windmobile</groupId>
+    <artifactId>windmobile-database-data-source</artifactId>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>ch.windmobile</groupId>
+        <artifactId>windmobile-data-source</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <modules>
+        <module>jdc-data-source</module>
+        <module>windline-data-source</module>
+    </modules>
+
+    <properties>
+        <hibernate.version>3.6.0.Final</hibernate.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jboss</id>
+            <name>JBoss Maven Repository</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+        <repository>
+            <id>sonatype</id>
+            <name>Sonatype Nexus Maven Repository</name>
+            <url>http://oss.sonatype.org</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-c3p0</artifactId>
+            <version>${hibernate.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.11.0.GA</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>2.2.0</version>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+</project>

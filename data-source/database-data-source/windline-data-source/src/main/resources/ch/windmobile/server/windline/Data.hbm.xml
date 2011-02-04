@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="ch.windmobile.server.windline.dataobject">
+    <class name="Data" table="tblstationdata">
+
+        <id name="id" type="java.lang.Integer">
+            <column name="tblstationdatano" />
+            <generator class="identity" />
+        </id>
+        <property name="time" type="timestamp">
+            <column name="measuredate" length="19" not-null="true" />
+        </property>
+        <property name="value" type="string">
+            <column name="data" />
+        </property>
+
+        <many-to-one name="station" class="Station" property-ref="stationId" fetch="select">
+            <column name="stationid" not-null="true" />
+        </many-to-one>
+        <many-to-one name="dataType" class="DataType" property-ref="dataId" fetch="select">
+            <column name="dataid" not-null="true" />
+        </many-to-one>
+    </class>
+</hibernate-mapping>

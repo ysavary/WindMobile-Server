@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="ch.windmobile.server.windline.dataobject">
+    <class name="Station" table="tblstation">
+
+        <id name="id" type="java.lang.Integer">
+            <column name="tblstationno" />
+            <generator class="identity" />
+        </id>
+        <property name="stationId" type="java.lang.Integer">
+            <column name="stationid" not-null="true" unique="true" />
+        </property>
+        <property name="name" type="string">
+            <column name="stationname" length="45" />
+        </property>
+        <property name="shortDescription" type="string">
+            <column name="shortdescription" not-null="true" />
+        </property>
+
+        <set name="propertyValues" table="tblstationproperty" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="tblstationno" not-null="true" />
+            </key>
+            <one-to-many class="PropertyValue" />
+        </set>
+    </class>
+</hibernate-mapping>

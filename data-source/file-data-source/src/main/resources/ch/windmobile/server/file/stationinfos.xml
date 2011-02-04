@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<stationInfos>
+    <stationInfo altitude="435" wgs84Longitude="6.622565743325921" wgs84Latitude="46.78358853529389"
+        dataValidity="1200" shortName="JDC Electronic - Yverdon-les-Bains" id="1000" />
+    <stationInfo altitude="1180" wgs84Longitude="6.611947797895198" wgs84Latitude="46.85427380087812"
+        dataValidity="1200" shortName="Mauborget" id="1001" />
+    <stationInfo altitude="1588" wgs84Longitude="6.466203196892025" wgs84Latitude="46.7724239318284"
+        dataValidity="1200" shortName="Le Suchet" id="1002" />
+    <stationInfo altitude="2857" wgs84Longitude="7.586549472076334" wgs84Latitude="46.149213826403276"
+        dataValidity="1200" shortName="Zinal" id="1003" />
+    <stationInfo altitude="0" dataValidity="1200" shortName="Tests WXT" id="2000" />
+</stationInfos>

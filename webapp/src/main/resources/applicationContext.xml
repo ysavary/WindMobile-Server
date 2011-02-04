@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <import resource="classpath:ch/windmobile/server/jdc/datasource.xml" />
+    <!--import resource="classpath:ch/windmobile/server/windline/datasource.xml" /-->
+
+    <context:property-placeholder location="classpath:jdc-datasource.properties,classpath:windline-datasource.properties" />
+
+    <!-- The REST service searches for this bean -->
+    <bean id="dataSource" class="ch.windmobile.server.model.AggregatedDataSource">
+        <constructor-arg name="corePoolSize" type="int" value="5" />
+        <constructor-arg name="maximumPoolSize" type="int" value="10" />
+        <constructor-arg name="timeout" type="int" value="60" />
+
+        <property name="dataSources">
+            <map>
+                <entry key="jdc" value-ref="jdcDataSource" />
+                <!--entry key="windline" value-ref="windlineDataSource" /-->
+            </map>
+        </property>
+    </bean>
+</beans>

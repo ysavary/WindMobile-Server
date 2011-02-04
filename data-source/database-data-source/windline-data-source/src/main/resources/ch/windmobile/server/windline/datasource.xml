@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="windlineJdbcDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />
+        <property name="jdbcUrl" value="${windline.jdbc.url}" />
+        <property name="user" value="${windline.jdbc.username}" />
+        <property name="password" value="${windline.jdbc.password}" />
+
+        <property name="minPoolSize" value="1" />
+        <property name="initialPoolSize" value="1" />
+        <property name="acquireIncrement" value="2" />
+        <property name="maxPoolSize" value="10" />
+        <property name="maxIdleTime" value="14400" />
+        <property name="idleConnectionTestPeriod" value="1800" />
+    </bean>
+
+    <bean id="windlineHibernateSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <property name="dataSource" ref="windlineJdbcDataSource" />
+        <property name="mappingResources">
+            <list>
+                <value>ch/windmobile/server/windline/Station.hbm.xml</value>
+                <value>ch/windmobile/server/windline/PropertyValue.hbm.xml</value>
+                <value>ch/windmobile/server/windline/Property.hbm.xml</value>
+                <value>ch/windmobile/server/windline/DataType.hbm.xml</value>
+                <value>ch/windmobile/server/windline/Data.hbm.xml</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.EhCacheRegionFactory</prop>
+                <prop key="hibernate.cache.use_query_cache">true</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">ch/windmobile/server/windline/ehcache.xml</prop>
+
+                <!-- Does not work: instead change the logger level "org.hibernate.SQL.level = FINE"
+                <prop key="hibernate.show_sql">false</prop> -->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="windlineDataSource" class="ch.windmobile.server.windline.WindlineDataSource">
+        <constructor-arg name="sessionFactory" ref="windlineHibernateSessionFactory" />
+    </bean>
+</beans>
