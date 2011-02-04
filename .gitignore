@@ -1,0 +1,13 @@
+# SVN noise
+.svn
+
+# osx noise
+.DS_Store
+
+# Java noise
+.class
+
+# Maven noise
+target
+
+# project specific
