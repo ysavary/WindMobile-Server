@@ -1,7 +1,7 @@
 # SVN noise
 .svn
 
-# osx noise
+# OS X noise
 .DS_Store
 
 # Java noise
@@ -15,4 +15,5 @@ target
 .settings
 .classpath
 
-# project specific
+# Project specific
+*-datasource.properties
