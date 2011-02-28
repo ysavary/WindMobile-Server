@@ -55,6 +55,7 @@
         <xs:attribute name="wgs84Latitude" type="xs:double" />
         <xs:attribute name="wgs84Longitude" type="xs:double" />
         <xs:attribute name="altitude" type="xs:int" />
+        <xs:attribute name="maintenanceStatus" type="Status" default="green" />
     </xs:complexType>
 
     <xs:simpleType name="Status">

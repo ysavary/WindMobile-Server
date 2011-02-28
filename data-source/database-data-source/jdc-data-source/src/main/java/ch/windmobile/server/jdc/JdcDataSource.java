@@ -244,6 +244,16 @@ public class JdcDataSource implements WindMobileDataSource {
         return expirationDate;
     }
 
+    static protected Status getMaintenanceStatus(Station station) {
+        if (station.getStatus() == JdcStatus.maintenance.getValue()) {
+            return Status.RED;
+        } else if (station.getStatus() == JdcStatus.test.getValue()) {
+            return Status.ORANGE;
+        } else {
+            return Status.GREEN;
+        }
+    }
+
     static protected Status getStatus(Station station, Calendar now, Calendar expirationDate) {
         // Orange > 10 minutes late
         Date orangeStatusLimit = new Date(expirationDate.getTimeInMillis() + 10 * 60 * 1000);
@@ -269,6 +279,7 @@ public class JdcDataSource implements WindMobileDataSource {
         stationInfo.setWgs84Latitude(Double.parseDouble(station.getWgs84Latitude()));
         stationInfo.setWgs84Longitude(Double.parseDouble(station.getWgs84Longitude()));
         stationInfo.setAltitude(station.getAltitude());
+        stationInfo.setMaintenanceStatus(getMaintenanceStatus(station));
 
         return stationInfo;
     }
