@@ -41,11 +41,11 @@
         overflowToDisk="false">
     </cache>
     
-    <!-- 4 minutes for data queries -->
+    <!-- 2 minutes for data queries -->
     <cache name="dataQueries"
         eternal="false"
         maxElementsInMemory="100"
-        timeToLiveSeconds="240"
+        timeToLiveSeconds="120"
         overflowToDisk="false">
     </cache>     
 </ehcache>

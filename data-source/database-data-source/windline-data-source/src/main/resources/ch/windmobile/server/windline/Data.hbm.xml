@@ -5,13 +5,14 @@
 
 <hibernate-mapping package="ch.windmobile.server.windline.dataobject">
     <class name="Data" table="tblstationdata">
+        <cache usage="read-only" region="datas" />
 
         <id name="id" type="java.lang.Integer">
             <column name="tblstationdatano" />
             <generator class="identity" />
         </id>
-        <property name="time" type="timestamp">
-            <column name="measuredate" length="19" not-null="true" />
+        <property name="time" type="ch.windmobile.server.windline.HibernateUTCDate">
+            <column name="measuredate" not-null="true" />
         </property>
         <property name="value" type="string">
             <column name="data" />

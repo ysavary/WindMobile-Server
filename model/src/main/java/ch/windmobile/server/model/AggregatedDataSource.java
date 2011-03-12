@@ -26,14 +26,14 @@ public class AggregatedDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private final int timeout;
-    
+
     private final ExecutorService executor;
     private Map<String, WindMobileDataSource> dataSources;
 
     public AggregatedDataSource(int corePoolSize, int maximumPoolSize, int timeout) {
         this.timeout = timeout;
-        executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, timeout, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
+        executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, timeout, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     public Map<String, WindMobileDataSource> getDataSources() {
@@ -91,8 +91,7 @@ public class AggregatedDataSource implements WindMobileDataSource {
                     List<StationInfo> stationInfos = future.get();
                     // Replace the id by the aggregated id
                     for (StationInfo stationInfo : stationInfos) {
-                        stationInfo.setId(AggregatedId.toString(callables.get(i).getDataSourceKey(),
-                            stationInfo.getId()));
+                        stationInfo.setId(AggregatedId.toString(callables.get(i).getDataSourceKey(), stationInfo.getId()));
                     }
                     aggregatedStationInfos.addAll(stationInfos);
                 } catch (ExecutionException e) {
@@ -101,7 +100,7 @@ public class AggregatedDataSource implements WindMobileDataSource {
                     log.warn("Could not get StationInfo list:", e);
                 } catch (CancellationException e) {
                     log.warn("Could not get StationInfo list:", e);
-                }                
+                }
             }
             return aggregatedStationInfos;
         } catch (Exception e) {
@@ -114,7 +113,9 @@ public class AggregatedDataSource implements WindMobileDataSource {
         try {
             AggregatedId aggregatedId = new AggregatedId(stationId);
             WindMobileDataSource dataSource = getDataSources().get(aggregatedId.getDataSourceKey());
-            return dataSource.getStationInfo(aggregatedId.getStationId());
+            StationInfo stationInfo = dataSource.getStationInfo(aggregatedId.getStationId());
+            stationInfo.setId(AggregatedId.toString(aggregatedId.getDataSourceKey(), stationInfo.getId()));
+            return stationInfo;
         } catch (Exception e) {
             throw exceptionHandler(e);
         }

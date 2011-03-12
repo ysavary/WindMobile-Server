@@ -5,7 +5,7 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <import resource="classpath:ch/windmobile/server/jdc/datasource.xml" />
-    <!--import resource="classpath:ch/windmobile/server/windline/datasource.xml" /-->
+    <import resource="classpath:ch/windmobile/server/windline/datasource.xml" />
 
     <context:property-placeholder location="classpath:jdc-datasource.properties,classpath:windline-datasource.properties" />
 
@@ -18,7 +18,7 @@
         <property name="dataSources">
             <map>
                 <entry key="jdc" value-ref="jdcDataSource" />
-                <!--entry key="windline" value-ref="windlineDataSource" /-->
+                <entry key="windline" value-ref="windlineDataSource" />
             </map>
         </property>
     </bean>

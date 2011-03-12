@@ -28,6 +28,7 @@ import ch.windmobile.server.model.xml.Point;
 import ch.windmobile.server.model.xml.Serie;
 import ch.windmobile.server.model.xml.StationData;
 import ch.windmobile.server.model.xml.StationInfo;
+import ch.windmobile.server.model.xml.StationLocationType;
 import ch.windmobile.server.model.xml.Status;
 
 public class JdcDataSource implements WindMobileDataSource {
@@ -142,21 +143,30 @@ public class JdcDataSource implements WindMobileDataSource {
      * Return the last value of a sensorId
      * 
      * @param session
-     * @param sensorId
+     * @param sensor
+     * @param date
      * @return
      * @throws DataSourceException
      */
-    private double getData(Session session, Sensor sensor) throws DataSourceException {
-        Calendar lastUpdate = getLastUpdate(session, sensor);
-
+    @SuppressWarnings("unchecked")
+    private double getData(Session session, Sensor sensor, Calendar date) throws DataSourceException {
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("sensor", sensor));
-        criteria.add(Restrictions.eq("time", lastUpdate.getTime()));
+        criteria.add(Restrictions.eq("time", date.getTime()));
         criteria.setCacheable(true);
         criteria.setCacheRegion("dataQueries");
 
-        Data data = (Data) criteria.uniqueResult();
-        return data.getValue();
+        List<Data> datas = criteria.list();
+        if (datas.size() != 1) {
+            log.warn("There are multiple values for sensor '" + sensor.getId() + "' at '" + date.getTime() + "'");
+            // Try to return the 1st non null value
+            for (Data data : datas) {
+                if (data.getValue() != 0) {
+                    return data.getValue();
+                }
+            }
+        }
+        return datas.get(0).getValue();
     }
 
     /**
@@ -276,6 +286,7 @@ public class JdcDataSource implements WindMobileDataSource {
         stationInfo.setShortName(station.getShortName());
         stationInfo.setName(station.getName());
         stationInfo.setDataValidity(getDataValidity());
+        stationInfo.setStationLocationType(StationLocationType.TAKEOFF);
         stationInfo.setWgs84Latitude(Double.parseDouble(station.getWgs84Latitude()));
         stationInfo.setWgs84Longitude(Double.parseDouble(station.getWgs84Longitude()));
         stationInfo.setAltitude(station.getAltitude());
@@ -336,7 +347,7 @@ public class JdcDataSource implements WindMobileDataSource {
 
         stationData.setStationId(getServerStationId(station.getId()));
 
-        // Last update
+        // Last update, based on wind average
         Sensor sensor = getSensorForChannel(session, station, Channel.windAverage);
         Calendar lastUpdate = getLastUpdate(session, sensor);
         stationData.setLastUpdate(lastUpdate);
@@ -351,12 +362,12 @@ public class JdcDataSource implements WindMobileDataSource {
 
         // Wind average
         sensor = getSensorForChannel(session, station, Channel.windAverage);
-        double windAverage = getData(session, sensor);
+        double windAverage = getData(session, sensor, lastUpdate);
         stationData.setWindAverage((float) windAverage);
 
         // Wind max
         sensor = getSensorForChannel(session, station, Channel.windMax);
-        double windMax = getData(session, sensor);
+        double windMax = getData(session, sensor, lastUpdate);
         stationData.setWindMax((float) windMax);
 
         // Wind direction chart
@@ -407,12 +418,12 @@ public class JdcDataSource implements WindMobileDataSource {
 
         // Air temperature
         sensor = getSensorForChannel(session, station, Channel.airTemperature);
-        double airTemperature = getData(session, sensor);
+        double airTemperature = getData(session, sensor, lastUpdate);
         stationData.setAirTemperature((float) airTemperature);
 
         // Air humidity
         sensor = getSensorForChannel(session, station, Channel.airHumidity);
-        double airHumidity = getData(session, sensor);
+        double airHumidity = getData(session, sensor, lastUpdate);
         stationData.setAirHumidity((float) airHumidity);
 
         return stationData;

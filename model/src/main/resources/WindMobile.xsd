@@ -41,6 +41,13 @@
         <xs:attribute name="status" type="Status" default="green" />
     </xs:complexType>
 
+    <xs:simpleType name="StationLocationType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="takeoff" />
+            <xs:enumeration value="lake" />
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:complexType name="StationInfo">
         <xs:attribute name="id" type="xs:string" use="required" />
         <xs:attribute name="shortName" type="xs:string" use="required" />
@@ -52,6 +59,7 @@
             </xs:annotation>
         </xs:attribute>
         <xs:attribute name="description" type="xs:string" />
+        <xs:attribute name="stationLocationType" type="StationLocationType" />
         <xs:attribute name="wgs84Latitude" type="xs:double" />
         <xs:attribute name="wgs84Longitude" type="xs:double" />
         <xs:attribute name="altitude" type="xs:int" />

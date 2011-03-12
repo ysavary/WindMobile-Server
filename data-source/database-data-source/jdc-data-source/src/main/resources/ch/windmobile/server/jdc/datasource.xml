@@ -12,6 +12,7 @@
         <property name="initialPoolSize" value="1" />
         <property name="acquireIncrement" value="2" />
         <property name="maxPoolSize" value="10" />
+        <property name="maxStatements" value="50" />
         <property name="maxIdleTime" value="14400" />
         <property name="idleConnectionTestPeriod" value="1800" />
     </bean>

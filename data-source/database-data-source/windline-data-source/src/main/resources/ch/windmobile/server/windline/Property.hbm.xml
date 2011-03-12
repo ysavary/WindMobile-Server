@@ -5,6 +5,7 @@
 
 <hibernate-mapping package="ch.windmobile.server.windline.dataobject">
     <class name="Property" table="tblstationpropertylist">
+        <cache usage="read-only" region="stationInfos" />
 
         <id name="id" type="java.lang.Integer">
             <column name="tblstationpropertylistno" />
