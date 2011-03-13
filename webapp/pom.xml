@@ -63,19 +63,19 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-spring</artifactId>
-            <version>1.4</version>
-            <!-- jersey-spring 1.4 still depends on/uses springframework 2.5, we use version 3 ! -->
+            <version>1.5</version>
+            <!-- jersey-spring 1.5 still depends on/uses springframework 2.5, we use version 3 ! -->
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework</groupId>
