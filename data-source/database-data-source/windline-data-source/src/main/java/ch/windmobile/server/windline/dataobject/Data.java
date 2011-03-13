@@ -5,20 +5,17 @@ import java.util.Date;
 public class Data implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    private int id;
     private Date time;
     private String value;
-    private Station station;
-    private DataType dataType;
+    private int stationId;
+    private int dataTypeId;
 
-    public Data() {
-    }
-
-    public Integer getId() {
+    public int getId() {
         return this.id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -38,19 +35,19 @@ public class Data implements java.io.Serializable {
         this.value = value;
     }
 
-    public Station getStation() {
-        return station;
+    public int getStationId() {
+        return stationId;
     }
 
-    public void setStation(Station station) {
-        this.station = station;
+    public void setStationId(int stationId) {
+        this.stationId = stationId;
     }
 
-    public DataType getDataType() {
-        return this.dataType;
+    public int getDataTypeId() {
+        return dataTypeId;
     }
 
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
+    public void setDataTypeId(int dataTypeId) {
+        this.dataTypeId = dataTypeId;
     }
 }

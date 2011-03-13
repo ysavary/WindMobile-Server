@@ -7,21 +7,23 @@
     <class name="Station" table="tblstation">
         <cache usage="read-only" region="stationInfos" />
 
-        <id name="id" type="java.lang.Integer">
+        <id name="id" type="int">
             <column name="tblstationno" />
             <generator class="identity" />
         </id>
-        <property name="stationId" type="java.lang.Integer">
+
+        <property name="stationId" type="int">
             <column name="stationid" not-null="true" unique="true" />
         </property>
         <property name="name" type="string">
-            <column name="stationname" length="45" />
+            <column name="stationname" />
         </property>
         <property name="shortDescription" type="string">
             <column name="shortdescription" not-null="true" />
         </property>
 
-        <set name="propertyValues" table="tblstationproperty" inverse="true" lazy="true" fetch="select">
+        <set name="propertyValues" table="tblstationproperty" inverse="true">
+            <cache usage="read-only" region="stationInfos" />
             <key>
                 <column name="tblstationno" not-null="true" />
             </key>

@@ -7,15 +7,16 @@
     <class name="PropertyValue" table="tblstationproperty">
         <cache usage="read-only" region="stationInfos" />
 
-        <id name="id" type="java.lang.Integer">
+        <id name="id" type="int">
             <column name="tblstationpropertyno" />
             <generator class="identity" />
         </id>
+
         <property name="value" type="string">
             <column name="value" not-null="true" />
         </property>
 
-        <many-to-one name="property" class="Property" fetch="select">
+        <many-to-one name="property" class="Property">
             <column name="tblstationpropertylistno" not-null="true" />
         </many-to-one>
     </class>

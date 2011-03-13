@@ -7,11 +7,12 @@
     <class name="DataType" table="tbldatatype">
         <cache usage="read-only" region="stationInfos" />
 
-        <id name="id" type="java.lang.Integer">
+        <id name="id" type="int">
             <column name="tbldatatypeno" />
             <generator class="identity" />
         </id>
-        <property name="dataId" type="java.lang.Integer">
+
+        <property name="dataTypeId" type="int">
             <column name="dataId" not-null="true" unique="true" />
         </property>
         <property name="name" type="string">

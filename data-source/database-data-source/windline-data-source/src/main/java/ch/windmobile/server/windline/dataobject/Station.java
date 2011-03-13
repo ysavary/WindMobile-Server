@@ -5,8 +5,8 @@ import java.util.Set;
 public class Station implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
-    private Integer stationId;
+    private int id;
+    private int stationId;
     private String name;
     private String shortDescription;
     private Set<PropertyValue> propertyValues;
@@ -14,19 +14,19 @@ public class Station implements java.io.Serializable {
     public Station() {
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public Integer getStationId() {
+    public int getStationId() {
         return stationId;
     }
 
-    public void setStationId(Integer stationId) {
+    public void setStationId(int stationId) {
         this.stationId = stationId;
     }
 

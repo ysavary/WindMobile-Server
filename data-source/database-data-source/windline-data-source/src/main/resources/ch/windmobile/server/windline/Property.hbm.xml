@@ -7,7 +7,7 @@
     <class name="Property" table="tblstationpropertylist">
         <cache usage="read-only" region="stationInfos" />
 
-        <id name="id" type="java.lang.Integer">
+        <id name="id" type="int">
             <column name="tblstationpropertylistno" />
             <generator class="identity" />
         </id>

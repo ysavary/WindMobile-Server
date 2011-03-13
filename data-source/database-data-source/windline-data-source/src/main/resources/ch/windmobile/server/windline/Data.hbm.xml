@@ -7,22 +7,22 @@
     <class name="Data" table="tblstationdata">
         <cache usage="read-only" region="datas" />
 
-        <id name="id" type="java.lang.Integer">
+        <id name="id" type="int">
             <column name="tblstationdatano" />
             <generator class="identity" />
         </id>
+
+        <property name="stationId" type="int">
+            <column name="stationid" not-null="true" />
+        </property>
+        <property name="dataTypeId" type="int">
+            <column name="dataid" not-null="true" />
+        </property>
         <property name="time" type="ch.windmobile.server.windline.HibernateUTCDate">
             <column name="measuredate" not-null="true" />
         </property>
         <property name="value" type="string">
             <column name="data" />
         </property>
-
-        <many-to-one name="station" class="Station" property-ref="stationId" fetch="select">
-            <column name="stationid" not-null="true" />
-        </many-to-one>
-        <many-to-one name="dataType" class="DataType" property-ref="dataId" fetch="select">
-            <column name="dataid" not-null="true" />
-        </many-to-one>
     </class>
 </hibernate-mapping>

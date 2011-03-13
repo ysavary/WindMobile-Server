@@ -3,14 +3,11 @@ package ch.windmobile.server.windline.dataobject;
 public class DataType implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
-    private Integer dataId;
+    private int id;
+    private int dataTypeId;
     private String name;
 
-    public DataType() {
-    }
-
-    public Integer getId() {
+    public int getId() {
         return this.id;
     }
 
@@ -18,12 +15,12 @@ public class DataType implements java.io.Serializable {
         this.id = id;
     }
 
-    public Integer getDataId() {
-        return dataId;
+    public int getDataTypeId() {
+        return dataTypeId;
     }
 
-    public void setDataId(Integer dataId) {
-        this.dataId = dataId;
+    public void setDataTypeId(int dataTypeId) {
+        this.dataTypeId = dataTypeId;
     }
 
     public String getName() {

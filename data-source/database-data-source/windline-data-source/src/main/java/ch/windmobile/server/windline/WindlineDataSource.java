@@ -28,7 +28,6 @@ import ch.windmobile.server.model.xml.StationInfo;
 import ch.windmobile.server.model.xml.StationLocationType;
 import ch.windmobile.server.model.xml.Status;
 import ch.windmobile.server.windline.dataobject.Data;
-import ch.windmobile.server.windline.dataobject.DataType;
 import ch.windmobile.server.windline.dataobject.Property;
 import ch.windmobile.server.windline.dataobject.PropertyValue;
 import ch.windmobile.server.windline.dataobject.Station;
@@ -44,18 +43,18 @@ public class WindlineDataSource implements WindMobileDataSource {
     private int windTrendScale = 500000;
 
     static enum DataTypeConstant {
-        windDirection("winddir1", "windDirection"), windAverage("windspeed1", "windAverage"), windMax("windpeak1", "windMax"), airTemperature(
-            "temp1", "airTemperature"), airHumidity("hum1", "airHumidity");
+        windDirection(16404, "windDirection"), windAverage(16402, "windAverage"), windMax(16410, "windMax"), airTemperature(16400, "airTemperature"), airHumidity(
+            16401, "airHumidity");
 
-        private final String id;
+        private final int id;
         private final String name;
 
-        private DataTypeConstant(String id, String name) {
+        private DataTypeConstant(int id, String name) {
             this.id = id;
             this.name = name;
         }
 
-        public String getId() {
+        public int getId() {
             return id;
         }
 
@@ -85,13 +84,14 @@ public class WindlineDataSource implements WindMobileDataSource {
     private Property getPropertyWithKey(Session session, String key) {
         Criteria criteria = session.createCriteria(Property.class);
         criteria.add(Restrictions.eq("key", key));
+        criteria.setCacheable(true);
+        criteria.setCacheRegion("stationInfos");
         return (Property) criteria.uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
     private List<Station> getStations(Session session) {
         Criteria criteria = session.createCriteria(Station.class);
-
         criteria.setCacheable(true);
         criteria.setCacheRegion("stationInfos");
         return criteria.list();
@@ -104,11 +104,11 @@ public class WindlineDataSource implements WindMobileDataSource {
         criteria.setCacheRegion("stationInfos");
         return (Station) criteria.uniqueResult();
     }
-    
-    private Calendar getLastUpdate(Session session, Station station, DataType dataType) throws DataSourceException {
+
+    private Calendar getLastUpdate(Session session, Station station, int dataTypeId) throws DataSourceException {
         Criteria criteria = session.createCriteria(Data.class);
-        criteria.add(Restrictions.eq("station", station));
-        criteria.add(Restrictions.eq("dataType", dataType));
+        criteria.add(Restrictions.eq("stationId", station.getStationId()));
+        criteria.add(Restrictions.eq("dataTypeId", dataTypeId));
         criteria.addOrder(Order.desc("time"));
         criteria.setMaxResults(1);
         criteria.setCacheable(true);
@@ -116,7 +116,7 @@ public class WindlineDataSource implements WindMobileDataSource {
 
         Data lastData = (Data) criteria.uniqueResult();
         if ((lastData == null) || (lastData.getTime() == null)) {
-            throw new DataSourceException(Error.INVALID_DATA, "No data found for type '" + dataType.getName() + "'");
+            throw new DataSourceException(Error.INVALID_DATA, "No data found for dataTypeId '" + dataTypeId + "'");
         }
 
         Calendar lastUpdate = new GregorianCalendar();
@@ -174,12 +174,12 @@ public class WindlineDataSource implements WindMobileDataSource {
      * @return
      * @throws DataSourceException
      */
-    private float getData(Session session, Station station, DataType dataType) throws DataSourceException {
-        Calendar lastUpdate = getLastUpdate(session, station, dataType);
+    private float getData(Session session, Station station, int dataTypeId) throws DataSourceException {
+        Calendar lastUpdate = getLastUpdate(session, station, dataTypeId);
 
         Criteria criteria = session.createCriteria(Data.class);
-        criteria.add(Restrictions.eq("station", station));
-        criteria.add(Restrictions.eq("dataType", dataType));
+        criteria.add(Restrictions.eq("stationId", station.getStationId()));
+        criteria.add(Restrictions.eq("dataTypeId", dataTypeId));
         criteria.add(Restrictions.eq("time", lastUpdate.getTime()));
         criteria.setCacheable(true);
         criteria.setCacheRegion("dataQueries");
@@ -199,13 +199,13 @@ public class WindlineDataSource implements WindMobileDataSource {
      * @throws DataSourceException
      */
     @SuppressWarnings("unchecked")
-    private List<Data> getHistoricData(Session session, Station station, DataType dataType, int duration) throws DataSourceException {
-        Calendar lastUpdate = getLastUpdate(session, station, dataType);
+    private List<Data> getHistoricData(Session session, Station station, int dataTypeId, int duration) throws DataSourceException {
+        Calendar lastUpdate = getLastUpdate(session, station, dataTypeId);
         long startTime = lastUpdate.getTimeInMillis() - duration * 1000;
 
         Criteria criteria = session.createCriteria(Data.class);
-        criteria.add(Restrictions.eq("station", station));
-        criteria.add(Restrictions.eq("dataType", dataType));
+        criteria.add(Restrictions.eq("stationId", station.getStationId()));
+        criteria.add(Restrictions.eq("dataTypeId", dataTypeId));
         criteria.add(Restrictions.ge("time", new Date(startTime)));
         criteria.setCacheable(true);
         criteria.setCacheRegion("dataQueries");
@@ -249,8 +249,7 @@ public class WindlineDataSource implements WindMobileDataSource {
             session = getSession();
             Station station = getStation(session, stationId);
 
-            DataType dataType = getDataType(session, DataTypeConstant.windAverage);
-            return getLastUpdate(session, station, dataType);
+            return getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;
@@ -327,21 +326,13 @@ public class WindlineDataSource implements WindMobileDataSource {
         }
     }
 
-    private DataType getDataType(Session session, DataTypeConstant dataTypeConstant) {
-        Criteria criteria = session.createCriteria(DataType.class);
-        criteria.add(Restrictions.eq("name", dataTypeConstant.getId()));
-        criteria.setCacheable(true);
-        return (DataType) criteria.uniqueResult();
-    }
-
     private StationData createStationData(Session session, Station station) throws DataSourceException {
         StationData stationData = new StationData();
 
         stationData.setStationId(getServerStationId(station.getStationId()));
 
         // Last update
-        DataType dataType = getDataType(session, DataTypeConstant.windAverage);
-        Calendar lastUpdate = getLastUpdate(session, station, dataType);
+        Calendar lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
         stationData.setLastUpdate(lastUpdate);
 
         // Expiration date
@@ -353,18 +344,15 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setStatus(getStatus(session, station, now, expirationDate));
 
         // Wind average
-        dataType = getDataType(session, DataTypeConstant.windAverage);
-        double windAverage = getData(session, station, dataType);
+        double windAverage = getData(session, station, DataTypeConstant.windAverage.getId());
         stationData.setWindAverage((float) windAverage);
 
         // Wind max
-        dataType = getDataType(session, DataTypeConstant.windMax);
-        double windMax = getData(session, station, dataType);
+        double windMax = getData(session, station, DataTypeConstant.windMax.getId());
         stationData.setWindMax((float) windMax);
 
         // Wind direction chart
-        dataType = getDataType(session, DataTypeConstant.windDirection);
-        List<Data> windDirectionDatas = getHistoricData(session, station, dataType, getHistoricDuration());
+        List<Data> windDirectionDatas = getHistoricData(session, station, DataTypeConstant.windDirection.getId(), getHistoricDuration());
         Serie windDirectionSerie = createSerie(windDirectionDatas);
         windDirectionSerie.setName(DataTypeConstant.windDirection.getName());
         Chart windDirectionChart = new Chart();
@@ -373,8 +361,7 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setWindDirectionChart(windDirectionChart);
 
         // Wind history min/average
-        dataType = getDataType(session, DataTypeConstant.windAverage);
-        List<Data> windAverageDatas = getHistoricData(session, station, dataType, getHistoricDuration());
+        List<Data> windAverageDatas = getHistoricData(session, station, DataTypeConstant.windAverage.getId(), getHistoricDuration());
         double minValue = Double.MAX_VALUE;
         double sum = 0;
         // double[][] windTrendAverageDatas = new double[windAverageDatas.size()][2];
@@ -390,8 +377,7 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setWindHistoryAverage((float) (sum / windAverageDatas.size()));
 
         // Wind history max
-        dataType = getDataType(session, DataTypeConstant.windMax);
-        List<Data> windMaxDatas = getHistoricData(session, station, dataType, getHistoricDuration());
+        List<Data> windMaxDatas = getHistoricData(session, station, DataTypeConstant.windMax.getId(), getHistoricDuration());
         double maxValue = Double.MIN_VALUE;
         double[][] windTrendMaxDatas = new double[windMaxDatas.size()][2];
         for (int i = 0; i < windMaxDatas.size(); i++) {
@@ -411,13 +397,11 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setWindTrend((int) angle);
 
         // Air temperature
-        dataType = getDataType(session, DataTypeConstant.airTemperature);
-        double airTemperature = getData(session, station, dataType);
+        double airTemperature = getData(session, station, DataTypeConstant.airTemperature.getId());
         stationData.setAirTemperature((float) airTemperature);
 
         // Air humidity
-        dataType = getDataType(session, DataTypeConstant.airHumidity);
-        double airHumidity = getData(session, station, dataType);
+        double airHumidity = getData(session, station, DataTypeConstant.airHumidity.getId());
         stationData.setAirHumidity((float) airHumidity);
 
         return stationData;
@@ -463,23 +447,22 @@ public class WindlineDataSource implements WindMobileDataSource {
             Chart windChart = new Chart();
 
             // Last update
-            DataType dataType = getDataType(session, DataTypeConstant.windAverage);
-            Calendar lastUpdate = getLastUpdate(session, station, dataType);
+            Calendar lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
             windChart.setLastUpdate(lastUpdate);
 
             // Wind historic chart
-            dataType = getDataType(session, DataTypeConstant.windAverage);
-            List<Data> windAverageDatas = getHistoricData(session, station, dataType, duration);
+            List<Data> windAverageDatas = getHistoricData(session, station, DataTypeConstant.windAverage.getId(), duration);
             Serie windAverageSerie = createSerie(windAverageDatas);
             windAverageSerie.setName(DataTypeConstant.windAverage.getName());
-            dataType = getDataType(session, DataTypeConstant.windMax);
-            List<Data> windMaxDatas = getHistoricData(session, station, dataType, duration);
+
+            List<Data> windMaxDatas = getHistoricData(session, station, DataTypeConstant.windMax.getId(), duration);
             Serie windMaxSerie = createSerie(windMaxDatas);
             windMaxSerie.setName(DataTypeConstant.windMax.getName());
-            dataType = getDataType(session, DataTypeConstant.windDirection);
-            List<Data> windDirectionDatas = getHistoricData(session, station, dataType, duration);
+
+            List<Data> windDirectionDatas = getHistoricData(session, station, DataTypeConstant.windDirection.getId(), duration);
             Serie windDirectionSerie = createSerie(windDirectionDatas);
             windDirectionSerie.setName(DataTypeConstant.windDirection.getName());
+
             windChart.setDuration(duration);
             windChart.getSeries().add(windAverageSerie);
             windChart.getSeries().add(windMaxSerie);

@@ -3,17 +3,14 @@ package ch.windmobile.server.windline.dataobject;
 public class Property implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    private int id;
     private String key;
 
-    public Property() {
-    }
-
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
