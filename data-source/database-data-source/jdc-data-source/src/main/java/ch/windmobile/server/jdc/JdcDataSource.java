@@ -129,7 +129,7 @@ public class JdcDataSource implements WindMobileDataSource {
         return lastUpdate;
     }
 
-    private Sensor getSensorForChannel(Session session, Station station, Channel channel) throws DataSourceException {
+    private Sensor getSensorForChannel(Station station, Channel channel) throws DataSourceException {
         Set<Sensor> sensors = station.getSensors();
         for (Sensor sensor : sensors) {
             if (sensor.getChannel() == channel.getId()) {
@@ -199,7 +199,7 @@ public class JdcDataSource implements WindMobileDataSource {
             session = getSession();
             Station station = getStation(session, stationId);
 
-            Sensor sensor = getSensorForChannel(session, station, Channel.windAverage);
+            Sensor sensor = getSensorForChannel(station, Channel.windAverage);
             return getLastUpdate(session, sensor);
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
@@ -348,7 +348,7 @@ public class JdcDataSource implements WindMobileDataSource {
         stationData.setStationId(getServerStationId(station.getId()));
 
         // Last update, based on wind average
-        Sensor sensor = getSensorForChannel(session, station, Channel.windAverage);
+        Sensor sensor = getSensorForChannel(station, Channel.windAverage);
         Calendar lastUpdate = getLastUpdate(session, sensor);
         stationData.setLastUpdate(lastUpdate);
 
@@ -361,17 +361,17 @@ public class JdcDataSource implements WindMobileDataSource {
         stationData.setStatus(getStatus(station, now, expirationDate));
 
         // Wind average
-        sensor = getSensorForChannel(session, station, Channel.windAverage);
+        sensor = getSensorForChannel(station, Channel.windAverage);
         double windAverage = getData(session, sensor, lastUpdate);
         stationData.setWindAverage((float) windAverage);
 
         // Wind max
-        sensor = getSensorForChannel(session, station, Channel.windMax);
+        sensor = getSensorForChannel(station, Channel.windMax);
         double windMax = getData(session, sensor, lastUpdate);
         stationData.setWindMax((float) windMax);
 
         // Wind direction chart
-        sensor = getSensorForChannel(session, station, Channel.windDirection);
+        sensor = getSensorForChannel(station, Channel.windDirection);
         List<Data> windDirectionDatas = getHistoricData(session, sensor, getHistoricDuration());
         Serie windDirectionSerie = createSerie(windDirectionDatas);
         windDirectionSerie.setName(Channel.windDirection.getName());
@@ -381,7 +381,7 @@ public class JdcDataSource implements WindMobileDataSource {
         stationData.setWindDirectionChart(windDirectionChart);
 
         // Wind history min/average
-        sensor = getSensorForChannel(session, station, Channel.windAverage);
+        sensor = getSensorForChannel(station, Channel.windAverage);
         List<Data> windAverageDatas = getHistoricData(session, sensor, getHistoricDuration());
         double minValue = Double.MAX_VALUE;
         double sum = 0;
@@ -397,7 +397,7 @@ public class JdcDataSource implements WindMobileDataSource {
         stationData.setWindHistoryAverage((float) (sum / windAverageDatas.size()));
 
         // Wind history max
-        sensor = getSensorForChannel(session, station, Channel.windMax);
+        sensor = getSensorForChannel(station, Channel.windMax);
         List<Data> windMaxDatas = getHistoricData(session, sensor, getHistoricDuration());
         double maxValue = Double.MIN_VALUE;
         double[][] windTrendMaxDatas = new double[windMaxDatas.size()][2];
@@ -417,12 +417,12 @@ public class JdcDataSource implements WindMobileDataSource {
         stationData.setWindTrend((int) angle);
 
         // Air temperature
-        sensor = getSensorForChannel(session, station, Channel.airTemperature);
+        sensor = getSensorForChannel(station, Channel.airTemperature);
         double airTemperature = getData(session, sensor, lastUpdate);
         stationData.setAirTemperature((float) airTemperature);
 
         // Air humidity
-        sensor = getSensorForChannel(session, station, Channel.airHumidity);
+        sensor = getSensorForChannel(station, Channel.airHumidity);
         double airHumidity = getData(session, sensor, lastUpdate);
         stationData.setAirHumidity((float) airHumidity);
 
@@ -469,20 +469,20 @@ public class JdcDataSource implements WindMobileDataSource {
             Chart windChart = new Chart();
 
             // Last update
-            Sensor sensor = getSensorForChannel(session, station, Channel.windAverage);
+            Sensor sensor = getSensorForChannel(station, Channel.windAverage);
             Calendar lastUpdate = getLastUpdate(session, sensor);
             windChart.setLastUpdate(lastUpdate);
 
             // Wind historic chart
-            sensor = getSensorForChannel(session, station, Channel.windAverage);
+            sensor = getSensorForChannel(station, Channel.windAverage);
             List<Data> windAverageDatas = getHistoricData(session, sensor, duration);
             Serie windAverageSerie = createSerie(windAverageDatas);
             windAverageSerie.setName(Channel.windAverage.getName());
-            sensor = getSensorForChannel(session, station, Channel.windMax);
+            sensor = getSensorForChannel(station, Channel.windMax);
             List<Data> windMaxDatas = getHistoricData(session, sensor, duration);
             Serie windMaxSerie = createSerie(windMaxDatas);
             windMaxSerie.setName(Channel.windMax.getName());
-            sensor = getSensorForChannel(session, station, Channel.windDirection);
+            sensor = getSensorForChannel(station, Channel.windDirection);
             List<Data> windDirectionDatas = getHistoricData(session, sensor, duration);
             Serie windDirectionSerie = createSerie(windDirectionDatas);
             windDirectionSerie.setName(Channel.windDirection.getName());
