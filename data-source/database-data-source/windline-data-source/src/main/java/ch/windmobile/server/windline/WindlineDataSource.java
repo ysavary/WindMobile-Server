@@ -235,8 +235,15 @@ public class WindlineDataSource implements WindMobileDataSource {
                 stationInfo.setWgs84Longitude(CoordinateHelper.parseDMS(propertyValue.getValue()));
             }
         }
+
         if (stationInfo.getAltitude() == null) {
-            stationInfo.setAltitude(-1);
+            throw new RuntimeException("Altitude not found");
+        }
+        if (stationInfo.getWgs84Latitude() == null) {
+            throw new RuntimeException("Latitude not found");
+        }
+        if (stationInfo.getWgs84Longitude() == null) {
+            throw new RuntimeException("Longitude not found");
         }
 
         return stationInfo;
@@ -291,7 +298,11 @@ public class WindlineDataSource implements WindMobileDataSource {
                 }
 
                 if (keepIt) {
-                    stationInfoList.add(createStationInfo(session, station));
+                    try {
+                        stationInfoList.add(createStationInfo(session, station));
+                    } catch (Exception e) {
+                        log.warn("This station '" + station.getId() + "' was ignored because:", e);
+                    }
                 }
             }
 
