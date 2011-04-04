@@ -1,4 +1,4 @@
-package ch.windmobile.server.windline;
+package ch.windmobile.server.jdc;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -14,8 +14,8 @@ import java.util.TimeZone;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 
-public class HibernateUTCDate implements UserType {
-    private static final TimeZone TZ_UTC = TimeZone.getTimeZone("UTC");
+public class HibernateJdcServerDate implements UserType {
+    private static final TimeZone TZ_UTC = TimeZone.getTimeZone("Etc/GMT-1");
     private static final SimpleDateFormat _utcFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
     static {
         _utcFormat.setTimeZone(TZ_UTC);

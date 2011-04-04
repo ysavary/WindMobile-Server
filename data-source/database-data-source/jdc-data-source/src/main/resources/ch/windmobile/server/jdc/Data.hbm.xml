@@ -11,7 +11,7 @@
             <column name="data_id" />
             <generator class="identity" />
         </id>
-        <property name="time" type="timestamp">
+        <property name="time" type="ch.windmobile.server.jdc.HibernateJdcServerDate">
             <column name="data_time" length="19" not-null="true" />
         </property>
         <property name="value" type="double">
