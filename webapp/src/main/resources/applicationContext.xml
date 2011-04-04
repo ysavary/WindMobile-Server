@@ -22,4 +22,14 @@
             </map>
         </property>
     </bean>
+
+   <!-- Enable hibernate statistics mbeans, check if hibernate.generate_statistics is set to true -->
+    <bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="beans">
+            <map>
+                <entry key="Hibernate:name=JDC statistics" value-ref="jdcHibernateStatisticsBean" />
+                <entry key="Hibernate:name=Windline statistics" value-ref="windlineHibernateStatisticsBean" />
+            </map>
+        </property>
+    </bean>
 </beans>

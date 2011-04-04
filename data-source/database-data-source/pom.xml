@@ -23,6 +23,7 @@
 
     <properties>
         <hibernate.version>3.6.1.Final</hibernate.version>
+        <bonecp.version>0.7.1-rc5</bonecp.version>
     </properties>
 
     <repositories>
@@ -36,6 +37,14 @@
             <name>Sonatype Nexus Maven Repository</name>
             <url>http://oss.sonatype.org</url>
         </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <id>bonecp-repo</id>
+            <name>BoneCP Repository</name>
+            <url>http://jolbox.com/bonecp/downloads/maven</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -45,9 +54,15 @@
             <version>${hibernate.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-c3p0</artifactId>
-            <version>${hibernate.version}</version>
+            <groupId>com.jolbox</groupId>
+            <artifactId>bonecp</artifactId>
+            <version>${bonecp.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jolbox</groupId>
+            <artifactId>bonecp-provider</artifactId>
+            <version>${bonecp.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

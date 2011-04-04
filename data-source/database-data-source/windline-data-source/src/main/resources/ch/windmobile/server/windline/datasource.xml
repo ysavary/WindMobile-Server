@@ -2,23 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="windlineJdbcDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-        <property name="driverClass" value="com.mysql.jdbc.Driver" />
-        <property name="jdbcUrl" value="${windline.jdbc.url}" />
-        <property name="user" value="${windline.jdbc.username}" />
-        <property name="password" value="${windline.jdbc.password}" />
-
-        <property name="minPoolSize" value="1" />
-        <property name="initialPoolSize" value="1" />
-        <property name="acquireIncrement" value="2" />
-        <property name="maxPoolSize" value="10" />
-        <property name="maxStatements" value="50" />
-        <property name="maxIdleTime" value="14400" />
-        <property name="idleConnectionTestPeriod" value="1800" />
-    </bean>
-
     <bean id="windlineHibernateSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
-        <property name="dataSource" ref="windlineJdbcDataSource" />
         <property name="mappingResources">
             <list>
                 <value>ch/windmobile/server/windline/Station.hbm.xml</value>
@@ -31,17 +15,41 @@
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.connection.provider_class">com.jolbox.bonecp.provider.BoneCPConnectionProvider</prop>
+                <prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>
+                <prop key="hibernate.connection.url">${windline.jdbc.url}</prop>
+                <prop key="hibernate.connection.username">${windline.jdbc.username}</prop>
+                <prop key="hibernate.connection.password">${windline.jdbc.password}</prop>
+                <prop key="bonecp.poolName">windline</prop>
+                <prop key="bonecp.partitionCount">1</prop>
+                <prop key="bonecp.minConnectionsPerPartition">2</prop>
+                <prop key="bonecp.maxConnectionsPerPartition">10</prop>
+                <prop key="bonecp.acquireIncrement">2</prop>
+                <prop key="bonecp.connectionTimeout">20000</prop>
+
                 <prop key="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.EhCacheRegionFactory</prop>
                 <prop key="hibernate.cache.use_query_cache">true</prop>
                 <prop key="net.sf.ehcache.configurationResourceName">ch/windmobile/server/windline/ehcache.xml</prop>
 
                 <!-- Does not work: instead change the logger level "org.hibernate.SQL.level = FINE"
                 <prop key="hibernate.show_sql">false</prop> -->
+
+                <prop key="hibernate.generate_statistics">true</prop>
             </props>
         </property>
     </bean>
 
     <bean id="windlineDataSource" class="ch.windmobile.server.windline.WindlineDataSource">
         <constructor-arg name="sessionFactory" ref="windlineHibernateSessionFactory" />
+    </bean>
+
+    <bean id="windlineHibernateStatisticsBean" class="org.hibernate.jmx.StatisticsService">
+        <property name="statisticsEnabled">
+            <value>true</value>
+        </property>
+        <property name="sessionFactory">
+            <ref local="windlineHibernateSessionFactory" />
+        </property>
     </bean>
 </beans>
