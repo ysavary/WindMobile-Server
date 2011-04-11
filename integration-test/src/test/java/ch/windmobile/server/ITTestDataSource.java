@@ -20,7 +20,7 @@ import ch.windmobile.server.model.xml.Serie;
 import ch.windmobile.server.model.xml.StationData;
 import ch.windmobile.server.model.xml.StationInfo;
 
-public abstract class TestDataSource extends AbstractTestNGSpringContextTests {
+public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm Z");
 
