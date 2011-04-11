@@ -6,5 +6,6 @@
 
     <import resource="classpath:ch/windmobile/server/jdc/datasource.xml" />
 
-    <context:property-placeholder location="classpath:jdc-datasource.properties" />
+    <context:property-placeholder location="classpath:jdc-datasource.properties"
+        ignore-resource-not-found="true" />
 </beans>

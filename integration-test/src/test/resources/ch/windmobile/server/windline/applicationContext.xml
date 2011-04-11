@@ -6,5 +6,6 @@
 
     <import resource="classpath:ch/windmobile/server/windline/datasource.xml" />
 
-    <context:property-placeholder location="classpath:windline-datasource.properties" />
+    <context:property-placeholder location="classpath:jdc-datasource.properties"
+        ignore-resource-not-found="true" />
 </beans>
