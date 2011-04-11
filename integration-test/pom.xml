@@ -68,6 +68,34 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>failsafe-maven-plugin</artifactId>
+                        <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>jdc.jdbc.url</name>
+                                    <value>${jdc.jdbc.url}</value>
+                                </property>
+                                <property>
+                                    <name>jdc.jdbc.username</name>
+                                    <value>${jdc.jdbc.username}</value>
+                                </property>
+                                <property>
+                                    <name>jdc.jdbc.password</name>
+                                    <value>${jdc.jdbc.password}</value>
+                                </property>
+                                <property>
+                                    <name>windline.jdbc.url</name>
+                                    <value>${windline.jdbc.url}</value>
+                                </property>
+                                <property>
+                                    <name>windline.jdbc.username</name>
+                                    <value>${windline.jdbc.username}</value>
+                                </property>
+                                <property>
+                                    <name>windline.jdbc.password</name>
+                                    <value>${windline.jdbc.password}</value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
                         <executions>
                             <execution>
                                 <goals>
