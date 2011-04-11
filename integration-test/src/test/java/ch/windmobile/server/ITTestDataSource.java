@@ -19,6 +19,7 @@ import ch.windmobile.server.model.xml.Chart;
 import ch.windmobile.server.model.xml.Serie;
 import ch.windmobile.server.model.xml.StationData;
 import ch.windmobile.server.model.xml.StationInfo;
+import ch.windmobile.server.model.xml.Status;
 
 public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -38,12 +39,14 @@ public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests 
         return results;
     }
 
-    void testLastUpdate(Calendar lastUpdate) {
+    void testLastUpdate(Calendar lastUpdate, boolean checkDataValidity) {
         Assert.assertNotNull(lastUpdate, "lastUpdate is null");
         Calendar now = new GregorianCalendar();
         Assert.assertFalse(lastUpdate.after(now), "lastUpdate is in the future");
-        lastUpdate.add(Calendar.HOUR_OF_DAY, 18);
-        Assert.assertTrue(lastUpdate.after(now), "lastUpdate is more than 18 hours old");
+        if (checkDataValidity) {
+            lastUpdate.add(Calendar.HOUR_OF_DAY, 18);
+            Assert.assertTrue(lastUpdate.after(now), "lastUpdate is more than 18 hours old");
+        }
     }
 
     @Test(dataProvider = "stationIds")
@@ -51,7 +54,7 @@ public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests 
         Calendar lastUpdate = dataSource.getLastUpdate(stationId);
         log.info("getLastUpdate returns " + dateFormatter.format(lastUpdate.getTime()));
 
-        testLastUpdate(lastUpdate);
+        testLastUpdate(lastUpdate, false);
     }
 
     void testStationId(String stationId) {
@@ -108,7 +111,7 @@ public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests 
         log.info("    windHistoryMax --> " + testWindValue(data.getWindHistoryMax()));
 
         testStationId(data.getStationId());
-        testLastUpdate(data.getLastUpdate());
+        testLastUpdate(data.getLastUpdate(), (data.getStatus() == Status.GREEN));
 
         Assert.assertNotNull(data.getStatus().value());
 
