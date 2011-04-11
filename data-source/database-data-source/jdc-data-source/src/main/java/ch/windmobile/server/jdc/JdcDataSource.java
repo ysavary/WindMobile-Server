@@ -236,7 +236,7 @@ public class JdcDataSource implements WindMobileDataSource {
         now.setTimeZone(stationLocalTimeZone);
         if (isSummerFrequency(now)) {
             expirationDate.setTimeInMillis(lastUpdate.getTimeInMillis() + 20 * 60 * 1000);
-            if (expirationDate.get(Calendar.HOUR_OF_DAY) >= 19) {
+            if (expirationDate.get(Calendar.HOUR_OF_DAY) >= 20) {
                 expirationDate.add(Calendar.DAY_OF_MONTH, 1);
                 expirationDate.set(Calendar.HOUR_OF_DAY, 8);
                 expirationDate.set(Calendar.MINUTE, 0);
