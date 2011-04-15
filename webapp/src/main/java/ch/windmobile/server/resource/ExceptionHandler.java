@@ -28,7 +28,7 @@ public class ExceptionHandler {
     }
 
     private static void logError(Throwable e) {
-        log.error("Exception threw to web service client", e);
+        log.error("WindMobile exception:", e);
     }
 
     static void treatException(Throwable e) throws WebApplicationException {
@@ -50,6 +50,10 @@ public class ExceptionHandler {
 
             Status httpStatus;
             switch (dataSourceException.getError()) {
+            case CONNECTION_ERROR:
+                httpStatus = Status.SERVICE_UNAVAILABLE;
+                break;
+                
             case INVALID_DATA:
                 httpStatus = Status.BAD_REQUEST;
                 break;

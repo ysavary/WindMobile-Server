@@ -15,6 +15,13 @@
         <property name="maxConnectionsPerPartition" value="10" />
         <property name="acquireIncrement" value="2" />
         <property name="connectionTimeoutInMs" value="20000" />
+        
+        <!-- MySQL driver "Connector/J" properties -->
+        <property name="driverProperties">
+            <props>
+                <prop key="socketTimeout">20000</prop>
+            </props>
+        </property>
     </bean>
     
     <!-- Spring bean configuration. Tell Spring to bounce off BoneCP -->
