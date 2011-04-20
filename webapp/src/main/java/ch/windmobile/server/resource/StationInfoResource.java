@@ -7,8 +7,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
-import ch.windmobile.server.model.WindMobileDataSource;
-import ch.windmobile.server.model.xml.StationInfo;
+import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
+import ch.windmobile.server.datasourcemodel.xml.StationInfo;
 
 import com.sun.jersey.api.NotFoundException;
 

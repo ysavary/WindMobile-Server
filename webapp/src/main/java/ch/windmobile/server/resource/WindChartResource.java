@@ -12,10 +12,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import ch.windmobile.server.model.DataSourceException;
-import ch.windmobile.server.model.WindMobileDataSource;
-import ch.windmobile.server.model.xml.Chart;
-import ch.windmobile.server.model.xml.Error;
+import ch.windmobile.server.datasourcemodel.DataSourceException;
+import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
+import ch.windmobile.server.datasourcemodel.xml.Chart;
+import ch.windmobile.server.datasourcemodel.xml.Error;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.spi.resource.Singleton;

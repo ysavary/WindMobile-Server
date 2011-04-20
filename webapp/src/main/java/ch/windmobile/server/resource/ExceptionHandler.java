@@ -11,8 +11,8 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.windmobile.server.model.DataSourceException;
-import ch.windmobile.server.model.xml.Error;
+import ch.windmobile.server.datasourcemodel.DataSourceException;
+import ch.windmobile.server.datasourcemodel.xml.Error;
 
 public class ExceptionHandler {
     protected static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);

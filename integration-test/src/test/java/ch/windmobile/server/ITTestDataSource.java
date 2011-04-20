@@ -13,13 +13,13 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import ch.windmobile.Assert;
-import ch.windmobile.server.model.DataSourceException;
-import ch.windmobile.server.model.WindMobileDataSource;
-import ch.windmobile.server.model.xml.Chart;
-import ch.windmobile.server.model.xml.Serie;
-import ch.windmobile.server.model.xml.StationData;
-import ch.windmobile.server.model.xml.StationInfo;
-import ch.windmobile.server.model.xml.Status;
+import ch.windmobile.server.datasourcemodel.DataSourceException;
+import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
+import ch.windmobile.server.datasourcemodel.xml.Chart;
+import ch.windmobile.server.datasourcemodel.xml.Serie;
+import ch.windmobile.server.datasourcemodel.xml.StationData;
+import ch.windmobile.server.datasourcemodel.xml.StationInfo;
+import ch.windmobile.server.datasourcemodel.xml.Status;
 
 public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests {
     private final Logger log = LoggerFactory.getLogger(getClass());

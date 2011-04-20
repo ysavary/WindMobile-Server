@@ -18,13 +18,13 @@
         <!-- Test dependencies -->
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-jdc-data-source</artifactId>
+            <artifactId>windmobile-jdc-datasource</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-windline-data-source</artifactId>
+            <artifactId>windmobile-windline-datasource</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

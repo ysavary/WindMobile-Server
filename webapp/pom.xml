@@ -31,22 +31,22 @@
     <dependencies>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-model</artifactId>
+            <artifactId>windmobile-datasource-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-file-data-source</artifactId>
+            <artifactId>windmobile-file-datasource</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-jdc-data-source</artifactId>
+            <artifactId>windmobile-jdc-datasource</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-windline-data-source</artifactId>
+            <artifactId>windmobile-windline-datasource</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

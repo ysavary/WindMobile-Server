@@ -12,8 +12,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import ch.windmobile.server.model.WindMobileDataSource;
-import ch.windmobile.server.model.xml.ObjectFactory;
+import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
+import ch.windmobile.server.datasourcemodel.xml.ObjectFactory;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.spi.resource.Singleton;

@@ -3,8 +3,8 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>WindMobile :: Server</name>
-    <description>WindMobile tomcat server</description>
+    <name>WindMobile :: Project</name>
+    <description>WindMobile project</description>
 
     <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-server</artifactId>
@@ -12,8 +12,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>model</module>
-        <module>data-source</module>
+        <module>datasource-model</module>
+        <module>datasource</module>
+        <module>social-model</module>
+        <module>social</module>
         <module>webapp</module>
         <module>integration-test</module>
     </modules>
