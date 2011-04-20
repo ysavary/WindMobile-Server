@@ -3,7 +3,8 @@
 
     <!-- Root element -->
     <xs:element name="user" type="User" />
-
+	
+	<!-- User object -->
     <xs:complexType name="User">
         <xs:all>
             <xs:element name="email" type="xs:string" />
