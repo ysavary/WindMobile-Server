@@ -7,48 +7,23 @@ import ch.windmobile.server.socialmodel.AuthenticationToken;
  *
  */
 public class BasicAuthenticationToken implements AuthenticationToken{
-	private final boolean authenticated;
-	private final String username;
-	private final Object password;
-	private final String tokenIdentifier;
-	private final String userPseudo;
-	
-	public BasicAuthenticationToken(String username,Object password) {
-		this.authenticated = false;
-		this.tokenIdentifier = null;
-		this.username = username;
-		this.password = password;
-		this.userPseudo = null;
-	}
-	
-	public BasicAuthenticationToken(BasicAuthenticationToken source,String authenticationTokenIdentifier,String userPseudo) {
-		this.authenticated = true;
-		this.tokenIdentifier = authenticationTokenIdentifier;
-		this.userPseudo = userPseudo;
-		this.username = new String(source.username);
-		this.password = null; // reset password, do not copy nor link it !
-	}
+	private final String sessionIdentifier;
+	private final String pseudo;
 
-	@Override
-	public boolean isAuthenticate() {
-		return authenticated;
-	}
+	public BasicAuthenticationToken(String sessionId,String pseudo) {
+		this.sessionIdentifier = sessionId;
+		this.pseudo = pseudo;
 
-	@Override
-	public String getTokenIdentifier() {
-		return tokenIdentifier;
-	}
-
-	public Object getPassword() {
-		return password;
-	}
-	
-	public String getUsername() {
-		return username;
 	}
 	
 	@Override
-	public String getUserPseudo() {
-		return userPseudo;
+	public String getSessionIdentifier() {
+		return sessionIdentifier;
 	}
+
+	@Override
+	public String getPseudo() {
+		return pseudo;
+	}
+
 }

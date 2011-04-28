@@ -5,7 +5,15 @@ package ch.windmobile.server.socialmodel;
  *
  */
 public interface UserService {
-	User login(String username,char[] pwd);
+	
+	/**
+	 * Login a user by providing username + password 
+	 * and return a valid session ID
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	String login(String username,char[] password);
 	
 	/**
 	 * Exception thrown by a login operation

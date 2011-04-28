@@ -21,8 +21,9 @@ public interface ServiceLocator {
 	
 	/**
 	 * Return a state-less epyx service
+	 * May throw an exception if service cannot be found
 	 */
-	<S> S getService(Class<S> serviceType);
+	<S> S getService(Class<S> serviceType) throws ServiceLocatorException;
 	
 	
 	static class ServiceLocatorException extends Exception {

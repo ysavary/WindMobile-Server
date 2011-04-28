@@ -1,21 +1,17 @@
 package ch.windmobile.server.socialmodel;
 
 public interface AuthenticationToken {
-	/**
-	 * Return true if the current authentication token has been authenticate
-	 * @return
-	 */
-	boolean isAuthenticate();
 	
 	/**
-	 * If authenticate, this will return the tokenID associated with this authentication
+	 * If authenticate, this will return the session ID associated with this authentication
 	 * @return
 	 */
-	String getTokenIdentifier();
+	String getSessionIdentifier();
 	
 	/**
-	 * Return the user name pseudo for this authentication token
+	 * Return the user pseudo name for this authentication token
 	 * @return
 	 */
-	String getUserPseudo();
+	String getPseudo();
+	
 }

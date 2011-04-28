@@ -7,10 +7,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.windmobile.server.socialmodel.AuthenticationService;
-import ch.windmobile.server.socialmodel.AuthenticationToken;
 
-
-public class TestSimpleAuthenticationService {
+public class SimpleAuthenticationServiceTest {
 
 	@Test(expected=AuthenticationService.AuthenticationServiceException.class)
 	public void testInvalidToken() throws Exception {
@@ -18,22 +16,7 @@ public class TestSimpleAuthenticationService {
 		upMap.put("userA", "pwdA");
 		upMap.put("userB", "pwdB");
 		AuthenticationService authenticationService = new SimpleAuthenticationService(upMap);
-		authenticationService.authenticate(new AuthenticationToken() {			
-			@Override
-			public boolean isAuthenticate() {
-				return false;
-			}
-			
-			@Override
-			public String getUserPseudo() {
-				return null;
-			}
-			
-			@Override
-			public String getTokenIdentifier() {
-				return null;
-			}
-		});
+		authenticationService.authenticate(null,null);
 	}
 		
 	@Test(expected=AuthenticationService.AuthenticationServiceException.class)
@@ -42,7 +25,7 @@ public class TestSimpleAuthenticationService {
 		upMap.put("userA", "pwdA");
 		upMap.put("userB", "pwdB");
 		AuthenticationService authenticationService = new SimpleAuthenticationService(upMap);
-		authenticationService.authenticate(new BasicAuthenticationToken("userC", null));
+		authenticationService.authenticate("userC", null);
 	}
 	
 	@Test(expected=AuthenticationService.AuthenticationServiceException.class)
@@ -51,7 +34,7 @@ public class TestSimpleAuthenticationService {
 		upMap.put("userA", "pwdA");
 		upMap.put("userB", "pwdB");
 		AuthenticationService authenticationService = new SimpleAuthenticationService(upMap);
-		authenticationService.authenticate(new BasicAuthenticationToken("userA", "bad"));
+		authenticationService.authenticate("userA", "bad");
 	}
 	
 	@Test(expected=AuthenticationService.AuthenticationServiceException.class)
@@ -60,7 +43,7 @@ public class TestSimpleAuthenticationService {
 		upMap.put("userA", "pwdA");
 		upMap.put("userB", "pwdB");
 		AuthenticationService authenticationService = new SimpleAuthenticationService(upMap);
-		authenticationService.authenticate(new BasicAuthenticationToken("userA", null));
+		authenticationService.authenticate("userA", null);
 	}
 	
 	public void testValidLogin() throws Exception {
@@ -68,11 +51,7 @@ public class TestSimpleAuthenticationService {
 		upMap.put("userA", "pwdA");
 		upMap.put("userB", "pwdB");
 		AuthenticationService authenticationService = new SimpleAuthenticationService(upMap);
-		AuthenticationToken result = authenticationService.authenticate(new BasicAuthenticationToken("userA", "pwdA"));
-		Assert.assertNotNull( result );
-		Assert.assertTrue( result instanceof BasicAuthenticationToken);
-		Assert.assertNotNull( result.getTokenIdentifier() );
-		Assert.assertEquals("userA", result.getUserPseudo() );
-		Assert.assertTrue( result.isAuthenticate() );
+		String sessionId = authenticationService.authenticate("userA", "pwdA");
+		Assert.assertNotNull( sessionId );
 	}
 }

@@ -8,10 +8,11 @@ public interface AuthenticationService {
 	
 	/**
 	 * Authenticate a token a return a NEW token to use within the application.
-	 * @param source Source token
-	 * @return Return a new authentication token
+	 * @param username username
+	 * @param password password object
+	 * @return Return a new session identifier
 	 */
-	AuthenticationToken authenticate( AuthenticationToken source ) throws AuthenticationServiceException;
+	String authenticate( String username,Object password ) throws AuthenticationServiceException;
 	
 	/**
 	 * Get an authentication token for a given ID, if the tokenID does not exist, this method returns null.
@@ -19,13 +20,13 @@ public interface AuthenticationService {
 	 * 1) the token have never been created
 	 * 2) the token has expired
 	 * 3) the token has been revoked 
-	 * @param tokenId Identifier for the token
+	 * @param sessionId Identifier for the session
 	 * @return
 	 */
-	AuthenticationToken getAuthenticationToken( String tokenId );
+	AuthenticationToken getAuthenticationToken( String sessionId ) throws AuthenticationServiceException;
 	
 	
-	static class AuthenticationServiceException extends Exception{
+	public static class AuthenticationServiceException extends Exception{
 		private static final long serialVersionUID = 1L;
 
 		public AuthenticationServiceException() {
