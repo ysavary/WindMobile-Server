@@ -1,11 +1,8 @@
 package ch.windmobile.server.windline;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.Vector;
 
 import org.hibernate.Criteria;
@@ -13,6 +10,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +25,7 @@ import ch.windmobile.server.datasourcemodel.xml.Serie;
 import ch.windmobile.server.datasourcemodel.xml.StationData;
 import ch.windmobile.server.datasourcemodel.xml.StationInfo;
 import ch.windmobile.server.datasourcemodel.xml.StationLocationType;
+import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 import ch.windmobile.server.datasourcemodel.xml.Status;
 import ch.windmobile.server.windline.dataobject.Data;
 import ch.windmobile.server.windline.dataobject.Property;
@@ -34,6 +34,9 @@ import ch.windmobile.server.windline.dataobject.Station;
 
 public class WindlineDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    // There is no timezone information stored in the JDC database
+    private static final DateTimeZone defaultStationTimeZone = DateTimeZone.getDefault();
 
     private static final String STATUS_OFFLINE = "offline";
     private static final String STATUS_DEMO = "demo";
@@ -105,7 +108,7 @@ public class WindlineDataSource implements WindMobileDataSource {
         return (Station) criteria.uniqueResult();
     }
 
-    private Calendar getLastUpdate(Session session, Station station, int dataTypeId) throws DataSourceException {
+    private DateTime getLastUpdate(Session session, Station station, int dataTypeId) throws DataSourceException {
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("stationId", station.getStationId()));
         criteria.add(Restrictions.eq("dataTypeId", dataTypeId));
@@ -119,9 +122,7 @@ public class WindlineDataSource implements WindMobileDataSource {
             throw new DataSourceException(Error.INVALID_DATA, "No data found for dataTypeId '" + dataTypeId + "'");
         }
 
-        Calendar lastUpdate = new GregorianCalendar();
-        lastUpdate.setTime(lastData.getTime());
-        return lastUpdate;
+        return new DateTime(lastData.getTime(), defaultStationTimeZone);
     }
 
     private Status getMaintenanceStatus(Session session, Station station) {
@@ -140,26 +141,21 @@ public class WindlineDataSource implements WindMobileDataSource {
         return Status.GREEN;
     }
 
-    static protected Calendar getExpirationDate(Calendar now, Calendar lastUpdate) {
-        TimeZone stationLocalTimeZone = lastUpdate.getTimeZone();
-        Calendar expirationDate = Calendar.getInstance(stationLocalTimeZone);
-
-        now.setTimeZone(stationLocalTimeZone);
-        expirationDate.setTimeInMillis(lastUpdate.getTimeInMillis() + 10 * 60 * 1000);
-        return expirationDate;
+    static protected DateTime getExpirationDate(DateTime lastUpdate) {
+        return lastUpdate.plus(10 * 60 * 1000);
     }
 
-    private Status getStatus(Session session, Station station, Calendar now, Calendar expirationDate) {
+    private Status getStatus(Session session, Station station, DateTime now, DateTime expirationDate) {
         // Orange > 10 minutes late
-        Date orangeStatusLimit = new Date(expirationDate.getTimeInMillis() + 10 * 60 * 1000);
+        DateTime orangeStatusLimit = expirationDate.plus(10 * 60 * 1000);
         // Red > 2h10 late
-        Date redStatusLimit = new Date(expirationDate.getTimeInMillis() + 2 * 3600 * 1000 + 10 * 60 * 1000);
+        DateTime redStatusLimit = expirationDate.plus(2 * 3600 * 1000 + 10 * 60 * 1000);
 
         Status maintenanceStatus = getMaintenanceStatus(session, station);
 
-        if ((maintenanceStatus == Status.RED) || (now.getTime().after(redStatusLimit))) {
+        if ((maintenanceStatus == Status.RED) || (now.isAfter(redStatusLimit))) {
             return Status.RED;
-        } else if ((maintenanceStatus == Status.ORANGE) || (now.getTime().after(orangeStatusLimit))) {
+        } else if ((maintenanceStatus == Status.ORANGE) || (now.isAfter(orangeStatusLimit))) {
             return Status.ORANGE;
         } else {
             return Status.GREEN;
@@ -175,12 +171,11 @@ public class WindlineDataSource implements WindMobileDataSource {
      * @throws DataSourceException
      */
     private float getData(Session session, Station station, int dataTypeId) throws DataSourceException {
-        Calendar lastUpdate = getLastUpdate(session, station, dataTypeId);
-
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("stationId", station.getStationId()));
         criteria.add(Restrictions.eq("dataTypeId", dataTypeId));
-        criteria.add(Restrictions.eq("time", lastUpdate.getTime()));
+        criteria.addOrder(Order.desc("time"));
+        criteria.setMaxResults(1);
         criteria.setCacheable(true);
         criteria.setCacheRegion("dataQueries");
 
@@ -200,8 +195,8 @@ public class WindlineDataSource implements WindMobileDataSource {
      */
     @SuppressWarnings("unchecked")
     private List<Data> getHistoricData(Session session, Station station, int dataTypeId, int duration) throws DataSourceException {
-        Calendar lastUpdate = getLastUpdate(session, station, dataTypeId);
-        long startTime = lastUpdate.getTimeInMillis() - duration * 1000;
+        DateTime lastUpdate = getLastUpdate(session, station, dataTypeId);
+        long startTime = lastUpdate.getMillis() - duration * 1000;
 
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("stationId", station.getStationId()));
@@ -250,13 +245,22 @@ public class WindlineDataSource implements WindMobileDataSource {
     }
 
     @Override
-    public Calendar getLastUpdate(String stationId) throws DataSourceException {
+    public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException {
         Session session = null;
         try {
             session = getSession();
             Station station = getStation(session, stationId);
+            StationUpdateTime returnObject = new StationUpdateTime();
 
-            return getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
+            // Last update
+            DateTime lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
+            returnObject.setLastUpdate(lastUpdate);
+
+            // Expiration date
+            DateTime expirationDate = getExpirationDate(lastUpdate);
+            returnObject.setExpirationDate(expirationDate);
+
+            return returnObject;
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;
@@ -343,12 +347,12 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setStationId(getServerStationId(station.getStationId()));
 
         // Last update
-        Calendar lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
+        DateTime lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
         stationData.setLastUpdate(lastUpdate);
 
         // Expiration date
-        Calendar now = Calendar.getInstance();
-        Calendar expirationDate = getExpirationDate(now, lastUpdate);
+        DateTime now = new DateTime(lastUpdate.getZone());
+        DateTime expirationDate = getExpirationDate(lastUpdate);
         stationData.setExpirationDate(expirationDate);
 
         // Status
@@ -458,7 +462,7 @@ public class WindlineDataSource implements WindMobileDataSource {
             Chart windChart = new Chart();
 
             // Last update
-            Calendar lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
+            DateTime lastUpdate = getLastUpdate(session, station, DataTypeConstant.windAverage.getId());
             windChart.setLastUpdate(lastUpdate);
 
             // Wind historic chart

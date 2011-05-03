@@ -1,21 +1,24 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-    jaxb:version="2.1" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" jaxb:extensionBindingPrefixes="xjc">
+    jaxb:version="2.0" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" jaxb:extensionBindingPrefixes="xjc">
 
     <xs:annotation>
         <xs:appinfo>
             <jaxb:globalBindings>
                 <!-- Force generating RootElements -->
                 <xjc:simple />
-                <jaxb:javaType xmlType="xs:dateTime" name="java.util.Calendar"
+                <!--
+                <jaxb:javaType xmlType="DateTime" name="org.joda.time.DateTime"
                     parseMethod="ch.windmobile.server.datasourcemodel.JaxbDateTimeConverter.parseDateTime" printMethod="ch.windmobile.server.datasourcemodel.JaxbDateTimeConverter.printDateTime" />
                 <jaxb:javaType xmlType="DataValue" name="java.lang.Float"
-                    parseMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.parseDataValue" printMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.printDataValue" />
+                    parseMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.parseDataValue"
+                    printMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.printDataValue" />
+                -->
             </jaxb:globalBindings>
         </xs:appinfo>
     </xs:annotation>
 
     <!-- Root element -->
-    <xs:element name="lastUpdate" type="xs:dateTime" />
+    <xs:element name="lastUpdate" type="StationUpdateTime" />
     <xs:element name="stationInfos">
         <xs:complexType>
             <xs:sequence>
@@ -35,9 +38,32 @@
     <xs:element name="chart" type="Chart" />
     <xs:element name="error" type="Error" />
 
-    <xs:complexType name="LastUpdate">
-        <xs:attribute name="lastUpdate" type="xs:dateTime" use="required" />
-        <xs:attribute name="expirationDate" type="xs:dateTime" use="required" />
+    <xs:simpleType name="DateTime">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:javaType name="org.joda.time.DateTime"
+                    parseMethod="ch.windmobile.server.datasourcemodel.JaxbDateTimeConverter.parseDateTime" printMethod="ch.windmobile.server.datasourcemodel.JaxbDateTimeConverter.printDateTime" />
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:dateTime" />
+    </xs:simpleType>
+
+    <xs:simpleType name="DataValue">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:javaType name="java.lang.Float"
+                    parseMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.parseDataValue"
+                    printMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.printDataValue" />
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:float">
+            <xs:minInclusive value="0" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="StationUpdateTime">
+        <xs:attribute name="lastUpdate" type="DateTime" use="required" />
+        <xs:attribute name="expirationDate" type="DateTime" use="required" />
         <xs:attribute name="status" type="Status" default="green" />
     </xs:complexType>
 
@@ -74,15 +100,9 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="DataValue">
-        <xs:restriction base="xs:float">
-            <xs:minInclusive value="0"></xs:minInclusive>
-        </xs:restriction>
-    </xs:simpleType>
-
     <xs:complexType name="StationData">
         <xs:complexContent>
-            <xs:extension base="LastUpdate">
+            <xs:extension base="StationUpdateTime">
                 <xs:all>
                     <xs:element name="windAverage" type="DataValue" />
                     <xs:element name="windMax" type="DataValue" />
@@ -115,7 +135,7 @@
 
     <xs:complexType name="Chart">
         <xs:complexContent>
-            <xs:extension base="LastUpdate">
+            <xs:extension base="StationUpdateTime">
                 <xs:sequence>
                     <xs:element name="serie" type="Serie" maxOccurs="unbounded" />
                 </xs:sequence>
@@ -129,8 +149,14 @@
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
-                <xs:attribute name="startDate" type="xs:dateTime" />
-                <xs:attribute name="duration" type="xs:int" />
+                <xs:attribute name="startDate" type="DateTime" />
+                <xs:attribute name="duration" type="xs:int">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">Duration in seconds, maximum 3 days else
+                            exception is
+                            raised</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

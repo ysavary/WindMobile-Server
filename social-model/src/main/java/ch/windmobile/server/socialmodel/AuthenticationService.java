@@ -8,11 +8,11 @@ public interface AuthenticationService {
 	
 	/**
 	 * Authenticate a token a return a NEW token to use within the application.
-	 * @param username username
+	 * @param email email
 	 * @param password password object
 	 * @return Return a new session identifier
 	 */
-	String authenticate( String username,Object password ) throws AuthenticationServiceException;
+	String authenticate( String email,Object password ) throws AuthenticationServiceException;
 	
 	/**
 	 * Get an authentication token for a given ID, if the tokenID does not exist, this method returns null.
@@ -44,7 +44,5 @@ public interface AuthenticationService {
 		public AuthenticationServiceException(Throwable cause) {
 			super(cause);
 		}
-			
-		
 	}
 }

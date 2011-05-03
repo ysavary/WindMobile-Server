@@ -1,83 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<name>WindMobile :: Server :: Social</name>
-	<description>WindMobile social server</description>
+    <name>WindMobile :: Server :: Social</name>
+    <description>WindMobile social server</description>
 
-	<groupId>ch.windmobile</groupId>
-	<artifactId>windmobile-social</artifactId>
-	<packaging>jar</packaging>
+    <groupId>ch.windmobile</groupId>
+    <artifactId>windmobile-social</artifactId>
+    <packaging>jar</packaging>
 
-	<properties>
-		<mongodb.version>2.5.3</mongodb.version>
-		<org.springframework.security.version>3.0.5.RELEASE</org.springframework.security.version>
-		<windmobile-mogodb-integration-tests-skip>true</windmobile-mogodb-integration-tests-skip>
-	</properties>
+    <properties>
+        <mongodb.version>2.5.3</mongodb.version>
+        <org.springframework.security.version>3.0.5.RELEASE</org.springframework.security.version>
+        <windmobile-mogodb-integration-tests-skip>true</windmobile-mogodb-integration-tests-skip>
+    </properties>
 
-	<parent>
-		<groupId>ch.windmobile</groupId>
-		<artifactId>windmobile-server</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>ch.windmobile</groupId>
+        <artifactId>windmobile-server</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-
-	<dependencies>
-		<dependency>
-			<groupId>ch.windmobile</groupId>
-			<artifactId>windmobile-social-model</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongo-java-driver</artifactId>
-			<version>${mongodb.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
-			<version>${org.springframework.security.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>1.6.2</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>ch.windmobile</groupId>
+            <artifactId>windmobile-social-model</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>${mongodb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${org.springframework.security.version}</version>
+        </dependency>
 		<!-- Test dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.7</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<!-- http://maven.apache.org/plugins/maven-compiler-plugin/ -->
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.8.1</version>
-				<configuration>
-					<skipTests>${windmobile-mogodb-integration-tests-skip}</skipTests>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <skipTests>${windmobile-mogodb-integration-tests-skip}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

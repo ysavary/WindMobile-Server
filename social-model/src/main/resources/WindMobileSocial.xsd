@@ -1,8 +1,26 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
     jaxb:version="2.1" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" jaxb:extensionBindingPrefixes="xjc">
 
+    <xs:annotation>
+        <xs:appinfo>
+            <jaxb:globalBindings>
+                <!-- Force generating RootElements -->
+                <xjc:simple />
+                <jaxb:javaType xmlType="xs:dateTime" name="org.joda.time.DateTime"
+                    parseMethod="ch.windmobile.server.socialmodel.JaxbDateTimeConverter.parseDateTime" printMethod="ch.windmobile.server.socialmodel.JaxbDateTimeConverter.printDateTime" />
+            </jaxb:globalBindings>
+        </xs:appinfo>
+    </xs:annotation>
+
     <!-- Root element -->
     <xs:element name="user" type="User" />
+    <xs:element name="messages">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="message" type="Message" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 	
 	<!-- User object -->
     <xs:complexType name="User">
@@ -10,6 +28,15 @@
             <xs:element name="email" type="xs:string" />
             <xs:element name="pseudo" type="xs:string" />
             <xs:element name="fullName" type="xs:string" />
+        </xs:all>
+    </xs:complexType>
+    
+        <!-- User object -->
+    <xs:complexType name="Message">
+        <xs:all>
+            <xs:element name="date" type="xs:dateTime" />
+            <xs:element name="pseudo" type="xs:string" />
+            <xs:element name="text" type="xs:string" />
         </xs:all>
     </xs:complexType>
 </xs:schema>

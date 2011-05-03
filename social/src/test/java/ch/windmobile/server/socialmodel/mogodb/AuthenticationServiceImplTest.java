@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.util.FileCopyUtils;
 
+import ch.windmobile.server.social.mongodb.MongoDBConstants;
+import ch.windmobile.server.social.mongodb.MongoDBServiceLocator;
 import ch.windmobile.server.socialmodel.AuthenticationService;
 import ch.windmobile.server.socialmodel.AuthenticationToken;
 import ch.windmobile.server.socialmodel.ServiceLocator;

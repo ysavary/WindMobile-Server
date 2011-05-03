@@ -50,6 +50,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>ch.windmobile</groupId>
+            <artifactId>windmobile-social</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
@@ -63,19 +68,19 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-spring</artifactId>
-            <version>1.5</version>
-            <!-- jersey-spring 1.5 still depends on/uses springframework 2.5, we use version 3 ! -->
+            <version>1.6</version>
+            <!-- jersey-spring 1.6 still depends on/uses springframework 2.5, we use version 3 ! -->
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework</groupId>
@@ -111,6 +116,43 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- REST Service security -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${org.springframework.version}</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${org.springframework.version}</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${org.springframework.version}</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
@@ -136,7 +178,7 @@
                     <warName>${war.name}</warName>
                 </configuration>
             </plugin>
-            <plugin>
+            <!-- plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
                 <version>1.0.3</version>
@@ -145,11 +187,11 @@
                     <container>
                         <containerId>tomcat6x</containerId>
                         <type>installed</type>
-                        <home>C:\Users\Yann\Documents\Android\apache-tomcat-6.0.26</home>
+                        <home>${user.home}/WindMobile/apache-tomcat</home>
                     </container>
                     <configuration>
                         <type>existing</type>
-                        <home>C:\Users\Yann\Documents\Android\apache-tomcat-6.0.26</home>
+                        <home>${user.home}/WindMobile/apache-tomcat</home>
                         <properties>
                             <cargo.jvmargs><![CDATA[-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n]]></cargo.jvmargs>
                         </properties>
@@ -163,10 +205,24 @@
                         </deployables>
                     </deployer>
                 </configuration>
-                <!-- executions> <execution> <id>verify-deploy</id> <phase>install</phase> <goals> <goal>start</goal> <goal>deployer-deploy</goal> 
-                    </goals> </execution> <execution> <id>clean-undeploy</id> <phase>pre-clean</phase> <goals> <goal>stop</goal> </goals> </execution> 
-                    </executions -->
-            </plugin>
+                <executions>
+                    <execution>
+                        <id>verify-deploy</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>start</goal>
+                            <goal>deployer-deploy</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>clean-undeploy</id>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin-->
         </plugins>
     </build>
 </project>

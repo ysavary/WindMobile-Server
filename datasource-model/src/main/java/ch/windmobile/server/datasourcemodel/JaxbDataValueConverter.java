@@ -6,15 +6,18 @@ import java.util.Locale;
 
 public class JaxbDataValueConverter {
 
-    private static final DecimalFormat decimalFormat;
-    static {
-        decimalFormat = (DecimalFormat) DecimalFormat.getInstance(Locale.US);
-        decimalFormat.applyPattern("0.0");
-    }
+    private static final ThreadLocal<DecimalFormat> decimalFormat = new ThreadLocal<DecimalFormat>() {
+        @Override
+        protected DecimalFormat initialValue() {
+            DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance(Locale.US);
+            decimalFormat.applyPattern("0.0");
+            return decimalFormat;
+        }
+    };
 
     public static Float parseDataValue(String source) {
         try {
-            return decimalFormat.parse(source).floatValue();
+            return decimalFormat.get().parse(source).floatValue();
         } catch (ParseException e) {
             return null;
         }
@@ -22,7 +25,7 @@ public class JaxbDataValueConverter {
 
     public static String printDataValue(Float number) {
         try {
-            return decimalFormat.format(number);
+            return decimalFormat.get().format(number);
         } catch (Exception e) {
             return null;
         }

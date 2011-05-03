@@ -1,7 +1,6 @@
 package ch.windmobile.server.datasourcemodel;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import ch.windmobile.server.datasourcemodel.DataSourceException.Error;
 import ch.windmobile.server.datasourcemodel.xml.Chart;
 import ch.windmobile.server.datasourcemodel.xml.StationData;
 import ch.windmobile.server.datasourcemodel.xml.StationInfo;
+import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 
 public class AggregatedDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -53,7 +53,7 @@ public class AggregatedDataSource implements WindMobileDataSource {
     }
 
     @Override
-    public Calendar getLastUpdate(String stationId) throws DataSourceException {
+    public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException {
         try {
             AggregatedId aggregatedId = new AggregatedId(stationId);
             WindMobileDataSource dataSource = getDataSources().get(aggregatedId.getDataSourceKey());

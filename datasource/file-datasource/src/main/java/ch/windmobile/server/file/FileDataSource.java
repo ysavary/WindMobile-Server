@@ -1,13 +1,12 @@
 package ch.windmobile.server.file;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -19,6 +18,7 @@ import ch.windmobile.server.datasourcemodel.xml.StationData;
 import ch.windmobile.server.datasourcemodel.xml.StationDatas;
 import ch.windmobile.server.datasourcemodel.xml.StationInfo;
 import ch.windmobile.server.datasourcemodel.xml.StationInfos;
+import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 
 public class FileDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -27,7 +27,7 @@ public class FileDataSource implements WindMobileDataSource {
     private final Resource stationDatasResource;
     private final Resource windChartResource;
 
-    private final Calendar lastUpdate;
+    private final DateTime lastUpdate;
     private final JAXBContext jaxbContext;
 
     public FileDataSource(Resource stationInfosResource, Resource stationDatasResource, Resource windChartResource) throws JAXBException {
@@ -35,7 +35,7 @@ public class FileDataSource implements WindMobileDataSource {
         this.stationDatasResource = stationDatasResource;
         this.windChartResource = windChartResource;
 
-        lastUpdate = new GregorianCalendar();
+        lastUpdate = new DateTime();
         jaxbContext = JAXBContext.newInstance("ch.windmobile.server.model.xml");
     }
 
@@ -52,8 +52,10 @@ public class FileDataSource implements WindMobileDataSource {
     }
 
     @Override
-    public Calendar getLastUpdate(String stationId) throws DataSourceException {
-        return lastUpdate;
+    public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException {
+        StationUpdateTime returnObject = new StationUpdateTime();
+        returnObject.setLastUpdate(lastUpdate);
+        return returnObject;
     }
 
     @Override

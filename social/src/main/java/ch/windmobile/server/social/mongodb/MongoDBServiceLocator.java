@@ -1,4 +1,4 @@
-package ch.windmobile.server.socialmodel.mogodb;
+package ch.windmobile.server.social.mongodb;
 
 import java.net.UnknownHostException;
 

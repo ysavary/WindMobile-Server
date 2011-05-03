@@ -1,10 +1,10 @@
 package ch.windmobile.server;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +19,12 @@ import ch.windmobile.server.datasourcemodel.xml.Chart;
 import ch.windmobile.server.datasourcemodel.xml.Serie;
 import ch.windmobile.server.datasourcemodel.xml.StationData;
 import ch.windmobile.server.datasourcemodel.xml.StationInfo;
+import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 import ch.windmobile.server.datasourcemodel.xml.Status;
 
 public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private static SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm Z");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm ZZ").withOffsetParsed();
 
     @Autowired
     private WindMobileDataSource dataSource;
@@ -39,22 +40,21 @@ public abstract class ITTestDataSource extends AbstractTestNGSpringContextTests 
         return results;
     }
 
-    void testLastUpdate(Calendar lastUpdate, boolean checkDataValidity) {
+    void testLastUpdate(DateTime lastUpdate, boolean checkDataValidity) {
         Assert.assertNotNull(lastUpdate, "lastUpdate is null");
-        Calendar now = new GregorianCalendar();
-        Assert.assertFalse(lastUpdate.after(now), "lastUpdate is in the future");
+        DateTime now = new DateTime();
+        Assert.assertFalse(lastUpdate.isAfter(now), "lastUpdate is in the future");
         if (checkDataValidity) {
-            lastUpdate.add(Calendar.HOUR_OF_DAY, 18);
-            Assert.assertTrue(lastUpdate.after(now), "lastUpdate is more than 18 hours old");
+            Assert.assertTrue(lastUpdate.plusHours(18).isAfter(now), "lastUpdate is more than 18 hours old");
         }
     }
 
     @Test(dataProvider = "stationIds")
     public void testGetLastUpdate(String stationId) throws DataSourceException {
-        Calendar lastUpdate = dataSource.getLastUpdate(stationId);
-        log.info("getLastUpdate returns " + dateFormatter.format(lastUpdate.getTime()));
+        StationUpdateTime lastUpdate = dataSource.getLastUpdate(stationId);
+        log.info("getLastUpdate returns " + lastUpdate.getLastUpdate().toString(dateFormatter));
 
-        testLastUpdate(lastUpdate, false);
+        testLastUpdate(lastUpdate.getLastUpdate(), false);
     }
 
     void testStationId(String stationId) {

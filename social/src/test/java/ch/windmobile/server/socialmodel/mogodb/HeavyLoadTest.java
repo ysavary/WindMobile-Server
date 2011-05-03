@@ -12,9 +12,12 @@ import java.util.logging.Logger;
 
 import org.springframework.util.FileCopyUtils;
 
+import ch.windmobile.server.social.mongodb.MongoDBConstants;
+import ch.windmobile.server.social.mongodb.MongoDBServiceLocator;
 import ch.windmobile.server.socialmodel.AuthenticationService;
 import ch.windmobile.server.socialmodel.ChatService;
 import ch.windmobile.server.socialmodel.ServiceLocator;
+import ch.windmobile.server.socialmodel.xml.Messages;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
@@ -58,14 +61,14 @@ public class HeavyLoadTest {
 				executor.execute( new Runnable() {
 					@Override
 					public void run() {
-						chatService.pushChat("TEST", sessionId, "Hello, this is message "+counter.incrementAndGet());	
+						chatService.postMessage("TEST", sessionId, "Hello, this is message "+counter.incrementAndGet());	
 						latch.countDown();
 					}					
 				});				
 			}
 			System.out.println("Chat sent, waiting for the end...");
 			latch.await(2, TimeUnit.MINUTES);
-			String ret = chatService.findChatItems("TEST", 5);
+			Messages ret = chatService.findMessages("TEST", 5);
 			System.out.println("result : "+ret);
 		} finally {
 			locator.disconnect();
@@ -78,7 +81,7 @@ public class HeavyLoadTest {
 			test.beforeTest();
 			long before = System.nanoTime();
 			test.testFullChatCycle();
-			System.out.println("Time : "+TimeUnit.NANOSECONDS.toMicros( ( System.nanoTime() - before ) )+" µs");
+			System.out.println("Time : "+TimeUnit.NANOSECONDS.toMicros( ( System.nanoTime() - before ) )+" ï¿½s");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,4 +1,4 @@
-package ch.windmobile.server.datasourcemodel;
+package ch.windmobile.server.socialmodel;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

@@ -8,9 +8,9 @@
     <import resource="classpath:ch/windmobile/server/windline/datasource.xml" />
 
     <context:property-placeholder location="classpath:jdc-datasource.properties,classpath:windline-datasource.properties" />
-
+    
     <!-- The REST service searches for this bean -->
-    <bean id="dataSource" class="ch.windmobile.server.model.AggregatedDataSource">
+    <bean id="dataSource" class="ch.windmobile.server.datasourcemodel.AggregatedDataSource">
         <constructor-arg name="corePoolSize" type="int" value="5" />
         <constructor-arg name="maximumPoolSize" type="int" value="10" />
         <constructor-arg name="timeout" type="int" value="60" />
@@ -23,7 +23,7 @@
         </property>
     </bean>
 
-   <!-- Enable hibernate statistics mbeans, check if hibernate.generate_statistics is set to true -->
+    <!-- Enable hibernate statistics mbeans, check if hibernate.generate_statistics is set to true -->
     <bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
         <property name="beans">
             <map>
@@ -31,5 +31,12 @@
                 <entry key="Hibernate:name=Windline statistics" value-ref="windlineHibernateStatisticsBean" />
             </map>
         </property>
+    </bean>
+
+    <!-- The REST service searches for this bean -->
+    <bean id="serviceLocator" class="ch.windmobile.server.social.mongodb.MongoDBServiceLocator" />
+
+    <bean id="authenticationProvider" class="ch.windmobile.server.security.WindMobileAuthenticationProvider">
+        <constructor-arg name="serviceLocator" ref="serviceLocator" />
     </bean>
 </beans>

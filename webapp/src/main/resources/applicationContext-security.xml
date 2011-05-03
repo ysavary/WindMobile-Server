@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+    <!-- (Yann) ) I'm unable to make annotation processing working with jersey servlet
+    <global-method-security jsr250-annotations="enable" />
+    -->
+
+    <http use-expressions="true">
+        <intercept-url pattern="/chatrooms/**/postmessage" access="isAuthenticated()" />
+        <http-basic />
+        <form-login />
+        <logout logout-url="/logout" />
+        <!-- Need a UserDetailsService
+        <remember-me />
+        -->
+
+        <session-management invalid-session-url="/timeout.jsp">
+            <concurrency-control max-sessions="5" error-if-maximum-exceeded="true" />
+        </session-management>
+    </http>
+
+    <authentication-manager>
+        <authentication-provider ref="authenticationProvider" />
+    </authentication-manager>
+</beans:beans>

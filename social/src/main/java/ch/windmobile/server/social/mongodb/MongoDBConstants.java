@@ -1,4 +1,4 @@
-package ch.windmobile.server.socialmodel.mogodb;
+package ch.windmobile.server.social.mongodb;
 
 public interface MongoDBConstants {
 	public final static String DATABASE_NAME = "epyx_windmobile";

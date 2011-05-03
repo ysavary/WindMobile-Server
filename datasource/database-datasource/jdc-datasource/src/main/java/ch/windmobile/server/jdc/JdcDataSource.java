@@ -1,11 +1,8 @@
 package ch.windmobile.server.jdc;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.Vector;
 
 import org.hibernate.Criteria;
@@ -13,12 +10,12 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.MutableDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.windmobile.server.jdc.dataobject.Data;
-import ch.windmobile.server.jdc.dataobject.Sensor;
-import ch.windmobile.server.jdc.dataobject.Station;
 import ch.windmobile.server.datasourcemodel.DataSourceException;
 import ch.windmobile.server.datasourcemodel.DataSourceException.Error;
 import ch.windmobile.server.datasourcemodel.LinearRegression;
@@ -29,10 +26,17 @@ import ch.windmobile.server.datasourcemodel.xml.Serie;
 import ch.windmobile.server.datasourcemodel.xml.StationData;
 import ch.windmobile.server.datasourcemodel.xml.StationInfo;
 import ch.windmobile.server.datasourcemodel.xml.StationLocationType;
+import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 import ch.windmobile.server.datasourcemodel.xml.Status;
+import ch.windmobile.server.jdc.dataobject.Data;
+import ch.windmobile.server.jdc.dataobject.Sensor;
+import ch.windmobile.server.jdc.dataobject.Station;
 
 public class JdcDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
+
+    // There is no timezone information stored in the JDC database
+    private static final DateTimeZone defaultStationTimeZone = DateTimeZone.getDefault();
 
     // 1 hour by default
     private int historicDuration = 60 * 60;
@@ -112,7 +116,7 @@ public class JdcDataSource implements WindMobileDataSource {
         return (Station) criteria.uniqueResult();
     }
 
-    private Calendar getLastUpdate(Session session, Sensor sensor) throws DataSourceException {
+    private DateTime getLastUpdate(Session session, Sensor sensor) throws DataSourceException {
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("sensor", sensor));
         criteria.addOrder(Order.desc("time"));
@@ -124,9 +128,7 @@ public class JdcDataSource implements WindMobileDataSource {
         if ((lastData == null) || (lastData.getTime() == null) || (lastData.getTime().getTime() == 0)) {
             throw new DataSourceException(Error.INVALID_DATA, "No data found for sensor '" + sensor.getId() + "'");
         }
-        Calendar lastUpdate = new GregorianCalendar();
-        lastUpdate.setTime(lastData.getTime());
-        return lastUpdate;
+        return new DateTime(lastData.getTime(), defaultStationTimeZone);
     }
 
     private Sensor getSensorForChannel(Station station, Channel channel) throws DataSourceException {
@@ -149,16 +151,18 @@ public class JdcDataSource implements WindMobileDataSource {
      * @throws DataSourceException
      */
     @SuppressWarnings("unchecked")
-    private double getData(Session session, Sensor sensor, Calendar date) throws DataSourceException {
+    private double getData(Session session, Sensor sensor, DateTime lastUpdate) throws DataSourceException {
+        Date date = new Date(lastUpdate.getMillis());
+
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("sensor", sensor));
-        criteria.add(Restrictions.eq("time", date.getTime()));
+        criteria.add(Restrictions.eq("time", date));
         criteria.setCacheable(true);
         criteria.setCacheRegion("dataQueries");
 
         List<Data> datas = criteria.list();
         if (datas.size() != 1) {
-            log.warn("There are multiple values for sensor '" + sensor.getId() + "' at '" + date.getTime() + "'");
+            log.warn("There are multiple values for sensor '" + sensor.getId() + "' at '" + date + "'");
             // Try to return the 1st non null value
             for (Data data : datas) {
                 if (data.getValue() != 0) {
@@ -181,8 +185,8 @@ public class JdcDataSource implements WindMobileDataSource {
      */
     @SuppressWarnings("unchecked")
     private List<Data> getHistoricData(Session session, Sensor sensor, int duration) throws DataSourceException {
-        Calendar lastUpdate = getLastUpdate(session, sensor);
-        long startTime = lastUpdate.getTimeInMillis() - duration * 1000;
+        DateTime lastUpdate = getLastUpdate(session, sensor);
+        long startTime = lastUpdate.getMillis() - duration * 1000;
 
         Criteria criteria = session.createCriteria(Data.class);
         criteria.add(Restrictions.eq("sensor", sensor));
@@ -193,14 +197,24 @@ public class JdcDataSource implements WindMobileDataSource {
     }
 
     @Override
-    public Calendar getLastUpdate(String stationId) throws DataSourceException {
+    public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException {
         Session session = null;
         try {
             session = getSession();
             Station station = getStation(session, stationId);
+            StationUpdateTime returnObject = new StationUpdateTime();
 
+            // Last update, based on wind average
             Sensor sensor = getSensorForChannel(station, Channel.windAverage);
-            return getLastUpdate(session, sensor);
+            DateTime lastUpdate = getLastUpdate(session, sensor);
+            returnObject.setLastUpdate(lastUpdate);
+
+            // Expiration date
+            DateTime now = new DateTime(lastUpdate.getZone());
+            DateTime expirationDate = getExpirationDate(now, lastUpdate);
+            returnObject.setExpirationDate(expirationDate);
+
+            return returnObject;
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;
@@ -215,7 +229,7 @@ public class JdcDataSource implements WindMobileDataSource {
     // Replaced by getExpirationDate()
     @Deprecated
     private int getDataValidity() {
-        Calendar now = Calendar.getInstance();
+        DateTime now = new DateTime(defaultStationTimeZone);
         if (isSummerFrequency(now)) {
             // Summer frequency
             return 20 * 60;
@@ -225,33 +239,31 @@ public class JdcDataSource implements WindMobileDataSource {
         }
     }
 
-    static protected boolean isSummerFrequency(Calendar date) {
-        return (date.get(Calendar.MONTH) >= Calendar.APRIL) && (date.get(Calendar.MONTH) <= Calendar.SEPTEMBER);
+    static protected boolean isSummerFrequency(DateTime date) {
+        return (date.getMonthOfYear() >= 4) && (date.getMonthOfYear() <= 9);
     }
 
-    static protected Calendar getExpirationDate(Calendar now, Calendar lastUpdate) {
-        TimeZone stationLocalTimeZone = lastUpdate.getTimeZone();
-        Calendar expirationDate = Calendar.getInstance(stationLocalTimeZone);
+    static protected DateTime getExpirationDate(DateTime now, DateTime lastUpdate) {
+        MutableDateTime expirationDate = new MutableDateTime(lastUpdate.getZone());
 
-        now.setTimeZone(stationLocalTimeZone);
         if (isSummerFrequency(now)) {
-            expirationDate.setTimeInMillis(lastUpdate.getTimeInMillis() + 20 * 60 * 1000);
-            if (expirationDate.get(Calendar.HOUR_OF_DAY) >= 20) {
-                expirationDate.add(Calendar.DAY_OF_MONTH, 1);
-                expirationDate.set(Calendar.HOUR_OF_DAY, 8);
-                expirationDate.set(Calendar.MINUTE, 0);
-                expirationDate.set(Calendar.SECOND, 0);
+            expirationDate.setMillis(lastUpdate.getMillis() + 20 * 60 * 1000);
+            if (expirationDate.getHourOfDay() >= 20) {
+                expirationDate.addDays(1);
+                expirationDate.setHourOfDay(8);
+                expirationDate.setMinuteOfHour(0);
+                expirationDate.setSecondOfMinute(0);
             }
         } else {
-            expirationDate.setTimeInMillis(lastUpdate.getTimeInMillis() + 60 * 60 * 1000);
-            if (expirationDate.get(Calendar.HOUR_OF_DAY) >= 17) {
-                expirationDate.add(Calendar.DAY_OF_MONTH, 1);
-                expirationDate.set(Calendar.HOUR_OF_DAY, 9);
-                expirationDate.set(Calendar.MINUTE, 0);
-                expirationDate.set(Calendar.SECOND, 0);
+            expirationDate.setMillis(lastUpdate.getMillis() + 60 * 60 * 1000);
+            if (expirationDate.getHourOfDay() >= 17) {
+                expirationDate.addDays(1);
+                expirationDate.setHourOfDay(9);
+                expirationDate.setMinuteOfHour(0);
+                expirationDate.setSecondOfMinute(0);
             }
         }
-        return expirationDate;
+        return expirationDate.toDateTime();
     }
 
     static protected Status getMaintenanceStatus(Station station) {
@@ -264,15 +276,15 @@ public class JdcDataSource implements WindMobileDataSource {
         }
     }
 
-    static protected Status getStatus(Station station, Calendar now, Calendar expirationDate) {
+    static protected Status getStatus(Station station, DateTime now, DateTime expirationDate) {
         // Orange > 10 minutes late
-        Date orangeStatusLimit = new Date(expirationDate.getTimeInMillis() + 10 * 60 * 1000);
+        DateTime orangeStatusLimit = expirationDate.plus(10 * 60 * 1000);
         // Red > 2h10 late
-        Date redStatusLimit = new Date(expirationDate.getTimeInMillis() + 2 * 3600 * 1000 + 10 * 60 * 1000);
+        DateTime redStatusLimit = expirationDate.plus(2 * 3600 * 1000 + 10 * 60 * 1000);
 
-        if ((station.getStatus() == JdcStatus.maintenance.getValue()) || (now.getTime().after(redStatusLimit))) {
+        if ((station.getStatus() == JdcStatus.maintenance.getValue()) || (now.isAfter(redStatusLimit))) {
             return Status.RED;
-        } else if ((station.getStatus() == JdcStatus.test.getValue()) || (now.getTime().after(orangeStatusLimit))) {
+        } else if ((station.getStatus() == JdcStatus.test.getValue()) || (now.isAfter(orangeStatusLimit))) {
             return Status.ORANGE;
         } else {
             return Status.GREEN;
@@ -349,12 +361,12 @@ public class JdcDataSource implements WindMobileDataSource {
 
         // Last update, based on wind average
         Sensor sensor = getSensorForChannel(station, Channel.windAverage);
-        Calendar lastUpdate = getLastUpdate(session, sensor);
+        DateTime lastUpdate = getLastUpdate(session, sensor);
         stationData.setLastUpdate(lastUpdate);
 
         // Expiration date
-        Calendar now = Calendar.getInstance();
-        Calendar expirationDate = getExpirationDate(now, lastUpdate);
+        DateTime now = new DateTime(lastUpdate.getZone());
+        DateTime expirationDate = getExpirationDate(now, lastUpdate);
         stationData.setExpirationDate(expirationDate);
 
         // Status
@@ -470,7 +482,7 @@ public class JdcDataSource implements WindMobileDataSource {
 
             // Last update
             Sensor sensor = getSensorForChannel(station, Channel.windAverage);
-            Calendar lastUpdate = getLastUpdate(session, sensor);
+            DateTime lastUpdate = getLastUpdate(session, sensor);
             windChart.setLastUpdate(lastUpdate);
 
             // Wind historic chart

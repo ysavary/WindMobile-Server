@@ -1,4 +1,4 @@
-package ch.windmobile.server.socialmodel.mogodb;
+package ch.windmobile.server.social.mongodb;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -6,9 +6,9 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
+import ch.windmobile.server.social.mongodb.util.UserServiceUtil;
 import ch.windmobile.server.socialmodel.AuthenticationService;
 import ch.windmobile.server.socialmodel.AuthenticationToken;
-import ch.windmobile.server.socialmodel.mogodb.util.UserServiceUtil;
 import ch.windmobile.server.socialmodel.util.BasicAuthenticationToken;
 
 import com.mongodb.BasicDBObject;
@@ -24,17 +24,17 @@ public class AuthenticationServiceImpl extends BaseMongoDBService implements Aut
 	}
 
 	@Override
-	public String authenticate(final String username,final Object password) throws AuthenticationServiceException {
+	public String authenticate(final String email,final Object password) throws AuthenticationServiceException {
 		if ( password == null ) {
 			throw new IllegalArgumentException("Password cannot be null");
 		}
 		DBCollection col = database.getCollection(MongoDBConstants.COL_USERS);
 		// Search user by email
-		DBObject result = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, username));
+		DBObject result = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
 		if ( result != null ) {
 			String b64 = (String) result.get(MongoDBConstants.USER_PROP_SHA1);
 			try {
-				boolean ok = new UserServiceUtil().validateSHA1(username, password.toString(), b64);
+				boolean ok = new UserServiceUtil().validateSHA1(email, password.toString(), b64);
 				if ( ok ) {
 					return createSession( result );
 				} else {

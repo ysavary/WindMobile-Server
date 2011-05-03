@@ -1,11 +1,11 @@
 package ch.windmobile.server.datasourcemodel;
 
-import java.util.Calendar;
 import java.util.List;
 
 import ch.windmobile.server.datasourcemodel.xml.Chart;
 import ch.windmobile.server.datasourcemodel.xml.StationData;
 import ch.windmobile.server.datasourcemodel.xml.StationInfo;
+import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 
 public interface WindMobileDataSource {
     
@@ -14,7 +14,7 @@ public interface WindMobileDataSource {
      * @return
      * @throws DataSourceException
      */
-    public Calendar getLastUpdate(String stationId) throws DataSourceException;
+    public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException;
     
 	/**
 	 * @param allStation

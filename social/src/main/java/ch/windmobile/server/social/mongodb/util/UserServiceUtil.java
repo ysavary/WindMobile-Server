@@ -1,4 +1,4 @@
-package ch.windmobile.server.socialmodel.mogodb.util;
+package ch.windmobile.server.social.mongodb.util;
 
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
