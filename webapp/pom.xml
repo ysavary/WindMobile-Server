@@ -79,8 +79,9 @@
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-spring</artifactId>
+            <!-- Waiting for 1.7 version that fix grizzly dependency issues -->
             <version>1.6</version>
-            <!-- jersey-spring 1.6 still depends on/uses springframework 2.5, we use version 3 ! -->
+            <!-- jersey-spring 1.6 depends on/uses old spring framework versions -->
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework</groupId>
