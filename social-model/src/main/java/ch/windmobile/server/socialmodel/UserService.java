@@ -1,28 +1,18 @@
 package ch.windmobile.server.socialmodel;
 
-/**
- * User service
- *
- */
+import ch.windmobile.server.socialmodel.xml.User;
+
 public interface UserService {
-	
-	/**
-	 * Login a user by providing username + password 
-	 * and return a valid session ID
-	 * @param username
-	 * @param password
-	 * @return
-	 */
-	String login(String username,char[] password);
-	
-	/**
-	 * Exception thrown by a login operation
-	 *
-	 */
-	static class LoginException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-		public LoginException(String message) {
-			super( message );
-		}
-	}
+
+    User findByEmail(String email) throws UserNotFound;
+
+    User findByPseudo(String pseudo) throws UserNotFound;
+
+    static class UserNotFound extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public UserNotFound(String message) {
+            super(message);
+        }
+    }
 }

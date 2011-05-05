@@ -7,12 +7,7 @@ import ch.windmobile.server.socialmodel.xml.Messages;
  * 
  */
 public interface ChatService {
-    // ---- Service command ------
-    /**
-     * Post a chat message on a given chat room ID for a given user session ID. Session ID must first be created using
-     * {@link AuthenticationService}. If the session ID is not valid, an {@link SecurityException} is raise
-     * Implementation should handle null sessionId for anonymous chat
-     */
+
     void postMessage(String chatRoomId, String pseudo, String message) throws SecurityException;
 
     /**

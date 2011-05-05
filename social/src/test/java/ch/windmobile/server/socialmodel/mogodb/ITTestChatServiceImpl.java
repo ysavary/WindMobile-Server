@@ -12,7 +12,6 @@ import org.springframework.util.FileCopyUtils;
 
 import ch.windmobile.server.social.mongodb.MongoDBConstants;
 import ch.windmobile.server.social.mongodb.MongoDBServiceLocator;
-import ch.windmobile.server.socialmodel.AuthenticationService;
 import ch.windmobile.server.socialmodel.ChatService;
 import ch.windmobile.server.socialmodel.ServiceLocator;
 import ch.windmobile.server.socialmodel.xml.Messages;
@@ -20,7 +19,7 @@ import ch.windmobile.server.socialmodel.xml.Messages;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 
-public class TestChatServiceImpl {
+public class ITTestChatServiceImpl {
 
     @Before
     public void beforeTest() {
@@ -50,11 +49,9 @@ public class TestChatServiceImpl {
     public void testFullChatCycle() throws Exception {
         ServiceLocator locator = new MongoDBServiceLocator().connect(null);
         try {
-            AuthenticationService authenticationService = locator.getService(AuthenticationService.class);
             ChatService chatService = locator.getService(ChatService.class);
-            String sessionId = authenticationService.authenticate("david@epyx.ch", "123");
             for (int i = 0; i < 50; i++) {
-                chatService.postMessage(sessionId, "TEST", "Hello, this is message " + i);
+                chatService.postMessage("Chat room", "Test user", "Hello, this is message " + i);
             }
             Messages messages = chatService.findMessages("TEST", 5);
             Assert.assertEquals("Hello, this is message 49", messages.getMessages().get(0).getText());

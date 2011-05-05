@@ -1,23 +1,24 @@
 package ch.windmobile.server.security;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import ch.windmobile.server.socialmodel.AuthenticationService;
 import ch.windmobile.server.socialmodel.ServiceLocator;
 import ch.windmobile.server.socialmodel.ServiceLocator.ServiceLocatorException;
 
 public class WindMobileAuthenticationProvider implements AuthenticationProvider {
-    private static final GrantedAuthority userRole = new GrantedAuthorityImpl("user");
+    public static final String roleAnonymous = "ROLE_ANONYMOUS";
+    public static final String roleUser = "ROLE_USER";
+    public static final GrantedAuthority roleAnonymousAuthority = new SimpleGrantedAuthority(roleAnonymous);
+    public static final GrantedAuthority roleUserAuthority = new SimpleGrantedAuthority(roleUser);
 
     private AuthenticationService authenticationService;
 
@@ -34,12 +35,11 @@ public class WindMobileAuthenticationProvider implements AuthenticationProvider 
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
         try {
             authenticationService.authenticate((String) token.getPrincipal(), (String) token.getCredentials());
-            Collection<? extends GrantedAuthority> userRoles = Arrays.asList(userRole);
-            UsernamePasswordAuthenticationToken successToken = new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(),
-                userRoles);
-            return successToken;
+            return new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(), Arrays.asList(roleUserAuthority));
         } catch (Exception e) {
-            throw new BadCredentialsException("Bad credentials", e);
+            // Silently return ROLE_ANONYMOUS instead throwing an HTTP exception (401: Unauthorized) which will be
+            // intercepted by the container
+            return new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(), Arrays.asList(roleAnonymousAuthority));
         }
     }
 
@@ -47,5 +47,4 @@ public class WindMobileAuthenticationProvider implements AuthenticationProvider 
     public boolean supports(Class<? extends Object> authentication) {
         return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
-
 }

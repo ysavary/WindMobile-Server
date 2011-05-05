@@ -28,7 +28,12 @@ public class ExceptionHandler {
     }
 
     private static void logError(Throwable e) {
-        log.error("WindMobile exception:", e);
+        if (e instanceof WebApplicationException) {
+            WebApplicationException web = (WebApplicationException) e;
+            log.error("WindMobile WebApplicationException(" + web.getResponse().getStatus() + "):", e);
+        } else {
+            log.error("WindMobile Exception:", e);
+        }
     }
 
     static void treatException(Throwable e) throws WebApplicationException {
@@ -53,7 +58,7 @@ public class ExceptionHandler {
             case CONNECTION_ERROR:
                 httpStatus = Status.SERVICE_UNAVAILABLE;
                 break;
-                
+
             case INVALID_DATA:
                 httpStatus = Status.BAD_REQUEST;
                 break;

@@ -5,9 +5,6 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
-import ch.windmobile.server.socialmodel.AuthenticationService;
-import ch.windmobile.server.socialmodel.AuthenticationService.AuthenticationServiceException;
-import ch.windmobile.server.socialmodel.AuthenticationToken;
 import ch.windmobile.server.socialmodel.xml.Message;
 import ch.windmobile.server.socialmodel.xml.Messages;
 
@@ -19,29 +16,13 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile.server.socialmodel.ChatService {
-    private final boolean allowAnonymous = Boolean.getBoolean("ch.epyx.wind-mobile.allowAnonymousChat");
-    private final AuthenticationService authenticationService;
 
-    public ChatServiceImpl(DB database, AuthenticationService authenticationService) {
+    public ChatServiceImpl(DB database) {
         super(database);
-        this.authenticationService = authenticationService;
     }
 
     @Override
     public void postMessage(final String chatRoomId, final String pseudo, final String message) {
-        /*
-        final String pseudo;
-        if (sessionId == null) {
-            if (allowAnonymous == false) {
-                throw new IllegalArgumentException("Unable to push chat on anonymous user");
-            } else {
-                pseudo = "anonymous";
-            }
-        } else {
-            pseudo = lookupUserPseudoForSessionIdentifier(sessionId);
-        }
-        */
-
         // create collection if does not exist
         final String collectionName = computeCollectionName(chatRoomId);
         DBCollection col;
@@ -66,15 +47,6 @@ public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile
         DBObject options = BasicDBObjectBuilder.start("capped", true).add("size", 10000).get();
         // create the capped chat room of 10K
         return database.createCollection(collectionName, options);
-    }
-
-    private String lookupUserPseudoForSessionIdentifier(String userSessionId) throws SecurityException {
-        try {
-            AuthenticationToken token = authenticationService.getAuthenticationToken(userSessionId);
-            return token.getPseudo();
-        } catch (AuthenticationServiceException e) {
-            throw new SecurityException(e);
-        }
     }
 
     @Override

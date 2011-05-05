@@ -35,8 +35,4 @@
 
     <!-- The REST service searches for this bean -->
     <bean id="serviceLocator" class="ch.windmobile.server.social.mongodb.MongoDBServiceLocator" />
-
-    <bean id="authenticationProvider" class="ch.windmobile.server.security.WindMobileAuthenticationProvider">
-        <constructor-arg name="serviceLocator" ref="serviceLocator" />
-    </bean>
 </beans>
