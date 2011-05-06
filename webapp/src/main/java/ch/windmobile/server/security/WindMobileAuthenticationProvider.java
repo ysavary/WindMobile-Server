@@ -39,7 +39,10 @@ public class WindMobileAuthenticationProvider implements AuthenticationProvider 
         } catch (Exception e) {
             // Silently return ROLE_ANONYMOUS instead throwing an HTTP exception (401: Unauthorized) which will be
             // intercepted by the container
-            return new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(), Arrays.asList(roleAnonymousAuthority));
+            Authentication anonymousToken = new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(),
+                Arrays.asList(roleAnonymousAuthority));
+            anonymousToken.setAuthenticated(false);
+            return anonymousToken;
         }
     }
 
