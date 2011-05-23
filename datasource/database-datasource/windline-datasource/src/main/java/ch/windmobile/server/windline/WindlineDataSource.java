@@ -359,16 +359,16 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setStatus(getStatus(session, station, now, expirationDate));
 
         // Wind average
-        double windAverage = getData(session, station, DataTypeConstant.windAverage.getId());
+        double windAverage = getData(session, station, DataTypeConstant.windAverage.getId()) * 3.6;
         stationData.setWindAverage((float) windAverage);
 
         // Wind max
-        double windMax = getData(session, station, DataTypeConstant.windMax.getId());
+        double windMax = getData(session, station, DataTypeConstant.windMax.getId()) * 3.6;
         stationData.setWindMax((float) windMax);
 
         // Wind direction chart
         List<Data> windDirectionDatas = getHistoricData(session, station, DataTypeConstant.windDirection.getId(), getHistoricDuration());
-        Serie windDirectionSerie = createSerie(windDirectionDatas);
+        Serie windDirectionSerie = createSerie(windDirectionDatas, 1f);
         windDirectionSerie.setName(DataTypeConstant.windDirection.getName());
         Chart windDirectionChart = new Chart();
         windDirectionChart.setDuration(getHistoricDuration());
@@ -441,12 +441,12 @@ public class WindlineDataSource implements WindMobileDataSource {
         }
     }
 
-    private Serie createSerie(List<Data> datas) {
+    private Serie createSerie(List<Data> datas, float conversionFactor) {
         Serie serie = new Serie();
         for (Data data : datas) {
             Point newPoint = new Point();
             newPoint.setDate(data.getTime().getTime());
-            newPoint.setValue(Float.parseFloat(data.getValue()));
+            newPoint.setValue(Float.parseFloat(data.getValue()) * conversionFactor);
             serie.getPoints().add(newPoint);
         }
         return serie;
@@ -467,15 +467,15 @@ public class WindlineDataSource implements WindMobileDataSource {
 
             // Wind historic chart
             List<Data> windAverageDatas = getHistoricData(session, station, DataTypeConstant.windAverage.getId(), duration);
-            Serie windAverageSerie = createSerie(windAverageDatas);
+            Serie windAverageSerie = createSerie(windAverageDatas, 3.6f);
             windAverageSerie.setName(DataTypeConstant.windAverage.getName());
 
             List<Data> windMaxDatas = getHistoricData(session, station, DataTypeConstant.windMax.getId(), duration);
-            Serie windMaxSerie = createSerie(windMaxDatas);
+            Serie windMaxSerie = createSerie(windMaxDatas, 3.6f);
             windMaxSerie.setName(DataTypeConstant.windMax.getName());
 
             List<Data> windDirectionDatas = getHistoricData(session, station, DataTypeConstant.windDirection.getId(), duration);
-            Serie windDirectionSerie = createSerie(windDirectionDatas);
+            Serie windDirectionSerie = createSerie(windDirectionDatas, 1f);
             windDirectionSerie.setName(DataTypeConstant.windDirection.getName());
 
             windChart.setDuration(duration);
