@@ -68,7 +68,7 @@ public class ChatRoomResource {
 
     @GET
     @Path("lastmessages/{maxCount}")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON + ";charset=UTF-8" })
     public Messages getMessages(@PathParam("maxCount") int maxCount) {
         try {
             ChatService chatService = serviceLocator.getService(ChatService.class);
