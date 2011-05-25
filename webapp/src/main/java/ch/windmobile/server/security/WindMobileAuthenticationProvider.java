@@ -17,8 +17,10 @@ import ch.windmobile.server.socialmodel.ServiceLocator.ServiceLocatorException;
 public class WindMobileAuthenticationProvider implements AuthenticationProvider {
     public static final String roleAnonymous = "ROLE_ANONYMOUS";
     public static final String roleUser = "ROLE_USER";
+    public static final String roleAdmin = "ROLE_ADMIN";
     public static final GrantedAuthority roleAnonymousAuthority = new SimpleGrantedAuthority(roleAnonymous);
     public static final GrantedAuthority roleUserAuthority = new SimpleGrantedAuthority(roleUser);
+    public static final GrantedAuthority roleAdminAuthority = new SimpleGrantedAuthority(roleAdmin);
 
     private AuthenticationService authenticationService;
 
@@ -34,8 +36,12 @@ public class WindMobileAuthenticationProvider implements AuthenticationProvider 
 
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
         try {
-            authenticationService.authenticate((String) token.getPrincipal(), (String) token.getCredentials());
-            return new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(), Arrays.asList(roleUserAuthority));
+            String currentRole = authenticationService.authenticate((String) token.getPrincipal(), (String) token.getCredentials());
+            if (roleAdmin.equals(currentRole)) {
+                return new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(), Arrays.asList(roleAdminAuthority));
+            } else {
+                return new UsernamePasswordAuthenticationToken(token.getPrincipal(), token.getCredentials(), Arrays.asList(roleUserAuthority));
+            }
         } catch (Exception e) {
             // Silently return ROLE_ANONYMOUS instead throwing an HTTP exception (401: Unauthorized) which will be
             // intercepted by the container

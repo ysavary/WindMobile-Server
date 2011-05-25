@@ -68,19 +68,18 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>1.6</version>
+            <version>1.7</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>1.6</version>
+            <version>1.7</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-spring</artifactId>
-            <!-- Waiting for 1.7 version that fix grizzly dependency issues -->
-            <version>1.6</version>
+            <version>1.7</version>
             <!-- jersey-spring 1.6 depends on/uses old spring framework versions -->
             <exclusions>
                 <exclusion>

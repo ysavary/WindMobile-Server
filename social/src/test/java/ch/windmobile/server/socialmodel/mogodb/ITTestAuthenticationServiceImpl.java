@@ -60,8 +60,8 @@ public class ITTestAuthenticationServiceImpl {
         ServiceLocator locator = new MongoDBServiceLocator().connect(null);
         try {
             AuthenticationService authenticationService = locator.getService(AuthenticationService.class);
-            boolean authenticated = authenticationService.authenticate("david@epyx.ch", "123");
-            Assert.assertTrue(authenticated);
+            String pseudo = authenticationService.authenticate("david@epyx.ch", "123");
+            Assert.assertNotNull(pseudo);
         } finally {
             locator.disconnect();
         }
@@ -72,8 +72,8 @@ public class ITTestAuthenticationServiceImpl {
         ServiceLocator locator = new MongoDBServiceLocator().connect(null);
         try {
             AuthenticationService authenticationService = locator.getService(AuthenticationService.class);
-            boolean authenticated = authenticationService.authenticate("unknown@epyx.ch", "445");
-            Assert.assertTrue(authenticated);
+            String pseudo = authenticationService.authenticate("unknown@epyx.ch", "445");
+            Assert.assertNotNull(pseudo);
         } finally {
             locator.disconnect();
         }
@@ -84,8 +84,8 @@ public class ITTestAuthenticationServiceImpl {
         ServiceLocator locator = new MongoDBServiceLocator().connect(null);
         try {
             AuthenticationService authenticationService = locator.getService(AuthenticationService.class);
-            boolean authenticated = authenticationService.authenticate("david@epyx.ch", "445");
-            Assert.assertTrue(authenticated);
+            String pseudo = authenticationService.authenticate("david@epyx.ch", "445");
+            Assert.assertNotNull(pseudo);
         } finally {
             locator.disconnect();
         }

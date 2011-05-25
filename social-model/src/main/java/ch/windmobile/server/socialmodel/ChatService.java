@@ -8,7 +8,7 @@ import ch.windmobile.server.socialmodel.xml.Messages;
  */
 public interface ChatService {
 
-    void postMessage(String chatRoomId, String pseudo, String message) throws SecurityException;
+    void postMessage(String chatRoomId, String pseudo, String message);
 
     /**
      * Retrieve the last 'maxCount' chat item for a given chat room ID. Result is returned ordered by chat post time

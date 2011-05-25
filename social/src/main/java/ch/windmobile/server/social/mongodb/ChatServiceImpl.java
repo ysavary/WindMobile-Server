@@ -56,7 +56,8 @@ public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile
         }
         final String collectionName = computeCollectionName(chatRoomId);
 
-        final DBObject fields = BasicDBObjectBuilder.start("user", 1).add("_id", 0).add("comment", 1).add("time", 1).get();
+        final DBObject fields = BasicDBObjectBuilder.start(MongoDBConstants.CHAT_PROP_USER, 1).add("_id", 0)
+            .add(MongoDBConstants.CHAT_PROP_COMMENT, 1).add(MongoDBConstants.CHAT_PROP_TIME, 1).get();
         DBCursor result = database.getCollection(collectionName).find(null, fields).sort(new BasicDBObject("$natural", -1)).limit(maxCount);
         List<DBObject> all = result.toArray();
 
@@ -65,14 +66,14 @@ public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile
             Message message = new Message();
             DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime((String) dbObject.get("time"));
             message.setDate(dateTime);
-            message.setPseudo((String) dbObject.get("user"));
-            message.setText((String) dbObject.get("comment"));
+            message.setPseudo((String) dbObject.get(MongoDBConstants.CHAT_PROP_USER));
+            message.setText((String) dbObject.get(MongoDBConstants.CHAT_PROP_COMMENT));
             messages.getMessages().add(message);
         }
         return messages;
     }
 
     private String computeCollectionName(final String chatRoomId) {
-        return MongoDBConstants.COL_CHAT_ROOM_PREFIX + chatRoomId;
+        return MongoDBConstants.COLLECTION_CHAT_ROOM_PREFIX + chatRoomId;
     }
 }

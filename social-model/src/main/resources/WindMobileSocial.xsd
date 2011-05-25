@@ -14,6 +14,7 @@
 
     <!-- Root element -->
     <xs:element name="user" type="User" />
+    <xs:element name="favorites" type="Favorites" />
     <xs:element name="messages">
         <xs:complexType>
             <xs:sequence>
@@ -29,10 +30,17 @@
             <xs:element name="pseudo" type="xs:string" />
             <xs:element name="fullName" type="xs:string" />
             <xs:element name="password" type="xs:string" />
+            <xs:element name="role" type="xs:string" />
+            <xs:element name="favorites" type="Favorites" />
         </xs:all>
     </xs:complexType>
-    
-        <!-- User object -->
+
+    <xs:complexType name="Favorites">
+        <xs:sequence>
+            <xs:element name="stationId" type="xs:string" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
     <xs:complexType name="Message">
         <xs:all>
             <xs:element name="date" type="xs:dateTime" />
