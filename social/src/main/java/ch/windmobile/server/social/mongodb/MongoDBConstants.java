@@ -15,4 +15,6 @@ public interface MongoDBConstants {
     public static final String USER_PROP_SHA1 = "sha1";
     public static final String USER_PROP_ROLE = "role";
     public static final String USER_PROP_FAVORITES = "favorites";
+
+    public static final String COLLECTION_COUNTERS = "counters";
 }

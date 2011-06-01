@@ -21,7 +21,7 @@ public class AuthenticationServiceImpl extends BaseMongoDBService implements Aut
         if (password == null) {
             throw new IllegalArgumentException("Password cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
         DBObject user = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
         if (user != null) {

@@ -22,6 +22,14 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+    <xs:element name="messageId" type="MessageId" />
+    <xs:element name="messageIds">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messageId" type="MessageId" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 	
 	<!-- User object -->
     <xs:complexType name="User">
@@ -41,8 +49,14 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:simpleType name="MessageId">
+        <xs:restriction base="xs:long">
+            <xs:minInclusive value="1" />
+        </xs:restriction>
+    </xs:simpleType>
     <xs:complexType name="Message">
         <xs:all>
+            <xs:element name="id" type="xs:string" />
             <xs:element name="date" type="xs:dateTime" />
             <xs:element name="pseudo" type="xs:string" />
             <xs:element name="text" type="xs:string" />

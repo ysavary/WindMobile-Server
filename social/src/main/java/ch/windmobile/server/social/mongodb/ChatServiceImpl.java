@@ -1,10 +1,12 @@
 package ch.windmobile.server.social.mongodb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
+import ch.windmobile.server.socialmodel.ChatService;
 import ch.windmobile.server.socialmodel.xml.Message;
 import ch.windmobile.server.socialmodel.xml.Messages;
 
@@ -15,38 +17,49 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile.server.socialmodel.ChatService {
+public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
+    private static final String counter = "function counter(name) { return db." + MongoDBConstants.COLLECTION_COUNTERS
+        + ".findAndModify({query:{_id:name}, update:{$inc : {counter:1}}, 'new':true, upsert:true}).next; };";
 
     public ChatServiceImpl(DB database) {
         super(database);
     }
 
-    @Override
-    public void postMessage(final String chatRoomId, final String pseudo, final String message) {
-        // create collection if does not exist
-        final String collectionName = computeCollectionName(chatRoomId);
-        DBCollection col;
-        try {
-            // try to create the collection, it may raise an exception if already create, in this case just ignore it
-            // and get the collection
-            // Due to the "consistency" behavior od mongoDB trying to first check if the collection exist the create it
-            // will not work, race condition will certainly occurs...
-            col = createChatCappedCollection(collectionName);
-        } catch (Exception ex) {
-            col = database.getCollection(collectionName);
-        }
-
-        DBObject chatItem = new BasicDBObject();
-        chatItem.put(MongoDBConstants.CHAT_PROP_COMMENT, message);
-        chatItem.put(MongoDBConstants.CHAT_PROP_USER, pseudo);
-        chatItem.put(MongoDBConstants.CHAT_PROP_TIME, new DateTime().toDateTimeISO().toString());
-        col.insert(chatItem);
+    private String computeCollectionName(final String chatRoomId) {
+        return MongoDBConstants.COLLECTION_CHAT_ROOM_PREFIX + chatRoomId;
     }
 
     private DBCollection createChatCappedCollection(String collectionName) {
         DBObject options = BasicDBObjectBuilder.start("capped", true).add("size", 10000).get();
         // create the capped chat room of 10K
-        return database.createCollection(collectionName, options);
+        return db.createCollection(collectionName, options);
+    }
+
+    public DBCollection getOrCreateCappedCollection(String collectionName) {
+        DBCollection col;
+        try {
+            // try to create the collection, it may raise an exception if already create, in this case just ignore it
+            // and get the collection
+            // Due to the "consistency" behavior of mongoDB trying to first check if the collection exist the create it
+            // will not work, race condition will certainly occurs...
+            col = createChatCappedCollection(collectionName);
+        } catch (Exception ex) {
+            col = db.getCollection(collectionName);
+        }
+        return col;
+    }
+
+    @Override
+    public void postMessage(final String chatRoomId, final String pseudo, final String message) {
+        final String collectionName = computeCollectionName(chatRoomId);
+        DBCollection col = getOrCreateCappedCollection(collectionName);
+
+        DBObject chatItem = new BasicDBObject();
+        chatItem.put("_id", db.eval(counter, chatRoomId));
+        chatItem.put(MongoDBConstants.CHAT_PROP_COMMENT, message);
+        chatItem.put(MongoDBConstants.CHAT_PROP_USER, pseudo);
+        chatItem.put(MongoDBConstants.CHAT_PROP_TIME, new DateTime().toDateTimeISO().toString());
+        col.insert(chatItem);
     }
 
     @Override
@@ -58,7 +71,7 @@ public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile
 
         final DBObject fields = BasicDBObjectBuilder.start(MongoDBConstants.CHAT_PROP_USER, 1).add("_id", 0)
             .add(MongoDBConstants.CHAT_PROP_COMMENT, 1).add(MongoDBConstants.CHAT_PROP_TIME, 1).get();
-        DBCursor result = database.getCollection(collectionName).find(null, fields).sort(new BasicDBObject("$natural", -1)).limit(maxCount);
+        DBCursor result = db.getCollection(collectionName).find(null, fields).sort(new BasicDBObject("$natural", -1)).limit(maxCount);
         List<DBObject> all = result.toArray();
 
         Messages messages = new Messages();
@@ -73,7 +86,23 @@ public class ChatServiceImpl extends BaseMongoDBService implements ch.windmobile
         return messages;
     }
 
-    private String computeCollectionName(final String chatRoomId) {
-        return MongoDBConstants.COLLECTION_CHAT_ROOM_PREFIX + chatRoomId;
+    @Override
+    public Long getLastMessageId(String chatRoomId) {
+        try {
+            Double value = (Double) db.getCollection(MongoDBConstants.COLLECTION_COUNTERS).findOne(new BasicDBObject("_id", chatRoomId))
+                .get("counter");
+            return value.longValue();
+        } catch (Exception e) {
+            return -1L;
+        }
+    }
+
+    @Override
+    public List<Long> getLastMessageIds(List<String> chatRoomIds) {
+        List<Long> returnValue = new ArrayList<Long>();
+        for (String chatRoomId : chatRoomIds) {
+            returnValue.add(getLastMessageId(chatRoomId));
+        }
+        return returnValue;
     }
 }

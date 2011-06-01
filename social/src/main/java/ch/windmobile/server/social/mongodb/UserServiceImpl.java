@@ -1,5 +1,6 @@
 package ch.windmobile.server.social.mongodb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ch.windmobile.server.socialmodel.UserService;
@@ -30,7 +31,7 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
         DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
         if (dbObject == null) {
@@ -44,7 +45,7 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         if (pseudo == null) {
             throw new IllegalArgumentException("Pseudo cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by pseudo
         DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_PSEUDO, pseudo));
         if (dbObject == null) {
@@ -59,14 +60,22 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
         DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
         if (dbObject == null) {
             throw new UserNotFound("Unable to find user with email '" + email + "'");
         }
 
-        return (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
+        List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
+        if (favorites == null) {
+            favorites = new ArrayList<String>();
+
+            dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
+            col.save(dbObject);
+        }
+
+        return favorites;
     }
 
     @SuppressWarnings("unchecked")
@@ -75,7 +84,7 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
         DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
         if (dbObject == null) {
@@ -83,8 +92,13 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         }
 
         List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        favorites.addAll(favoritesToAdd);
+        if (favorites == null) {
+            favorites = new ArrayList<String>();
+        }
 
+        if (favoritesToAdd != null) {
+            favorites.addAll(favoritesToAdd);
+        }
         dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
         col.save(dbObject);
 
@@ -97,7 +111,7 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
         DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
         if (dbObject == null) {
@@ -105,8 +119,13 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         }
 
         List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        favorites.removeAll(favoritesToRemove);
+        if (favorites == null) {
+            favorites = new ArrayList<String>();
+        }
 
+        if (favoritesToRemove != null) {
+            favorites.removeAll(favoritesToRemove);
+        }
         dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
         col.save(dbObject);
 
@@ -119,7 +138,7 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
-        DBCollection col = database.getCollection(MongoDBConstants.COLLECTION_USERS);
+        DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
         DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
         if (dbObject == null) {
@@ -127,7 +146,11 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         }
 
         List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        favorites.clear();
+        if (favorites == null) {
+            favorites = new ArrayList<String>();
+        } else {
+            favorites.clear();
+        }
 
         dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
         col.save(dbObject);

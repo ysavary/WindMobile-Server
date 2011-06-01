@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBElement;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -25,6 +26,7 @@ import ch.windmobile.server.socialmodel.ChatService;
 import ch.windmobile.server.socialmodel.ServiceLocator;
 import ch.windmobile.server.socialmodel.UserService;
 import ch.windmobile.server.socialmodel.xml.Messages;
+import ch.windmobile.server.socialmodel.xml.ObjectFactory;
 
 public class ChatRoomResource {
     private ServiceLocator serviceLocator;
@@ -73,6 +75,19 @@ public class ChatRoomResource {
         try {
             ChatService chatService = serviceLocator.getService(ChatService.class);
             return chatService.findMessages(chatRoomId, maxCount);
+        } catch (Exception e) {
+            ExceptionHandler.treatException(e);
+            return null;
+        }
+    }
+
+    @GET
+    @Path("lastmessage")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public JAXBElement<Long> getLastMessageId() {
+        try {
+            ChatService chatService = serviceLocator.getService(ChatService.class);
+            return new ObjectFactory().createMessageId(chatService.getLastMessageId(chatRoomId));
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;
