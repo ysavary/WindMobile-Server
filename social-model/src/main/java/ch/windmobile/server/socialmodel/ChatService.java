@@ -10,7 +10,7 @@ import ch.windmobile.server.socialmodel.xml.Messages;
  */
 public interface ChatService {
 
-    void postMessage(String chatRoomId, String pseudo, String message);
+    void postMessage(String chatRoomId, String pseudo, String message, String emailHash);
 
     /**
      * @param chatRoomId
@@ -28,4 +28,9 @@ public interface ChatService {
      * Retrieve the last 'maxCount' chat item for a given chat room ID. Result is returned ordered by chat post time
      */
     Messages findMessages(String chatRoomId, int maxCount);
+
+    /**
+     *
+     */
+    boolean allowAnonymousMessages(String chatRoomId);
 }

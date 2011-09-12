@@ -152,9 +152,8 @@
                 <xs:attribute name="startDate" type="DateTime" />
                 <xs:attribute name="duration" type="xs:int">
                     <xs:annotation>
-                        <xs:documentation xml:lang="en">Duration in seconds, maximum 3 days else
-                            exception is
-                            raised</xs:documentation>
+                        <xs:documentation xml:lang="en">Duration in seconds, maximum 3 days else exception
+                            is raised</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
             </xs:extension>

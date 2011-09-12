@@ -1,14 +1,14 @@
 db.users.drop();
 
-// pwd == abc
-db.users.insert({"pseudo":"Yann","email":"yann@epyx.ch","fullName":"Yann Savary","sha1":"Mftkglbk9d2KY3GOLWq0shuAte4=","role":"admin"});
-//pwd == 123
-db.users.insert({"pseudo":"David","email":"david@epyx.ch","fullName":"David Saradini","sha1":"T+ST7rQ2j53lLHDuFCVxrfUbYUY="});
-//pwd == 456
-db.users.insert({"pseudo":"Cédric","email":"cedric@epyx.ch","fullName":"Cédric Tallichet","sha1":"fk4O+ED9KBt8c809UQgYDtmRR3U="});
-//pwd == 123
-db.users.insert({"pseudo":"Vincent","email":"vincent@epyx.ch","fullName":"Vincent Fournié","sha1":"WmqwczS01lxRldW4dznGz7jpIlA="});
-//pwd == 123
-db.users.insert({"pseudo":"Stefan","email":"stefan@epyx.ch","fullName":"Stefan Paychère","sha1":"qy+saGQxhVjIYmNttcDDVkTUoQ8="});
-//pwd == 123
-db.users.insert({"pseudo":"Nicolas","email":"nicolas@epyx.ch","fullName":"Nicolas Fulpius","sha1":"MPXNTo83MF5Ockex84yheWnxtl8="});
+// pwd == 123
+db.users.insert({"pseudo":"Yann","email":"yann.savary@epyx.ch","fullName":"Yann Savary","sha1":"RZvCXeFdiYFed1b+H3yztLq47Tg=","role":"admin"});
+// pwd == 123
+db.users.insert({"pseudo":"David","email":"david.saradini@epyx.ch","fullName":"David Saradini","sha1":"8ew51sCZPfHKBw4EEg60kbKInIg="});
+// pwd == 123
+db.users.insert({"pseudo":"Cédric","email":"cedric.tallichet@epyx.ch","fullName":"Cédric Tallichet","sha1":"i/Vp34ljLBBoLqYsQ6SIW5hX4cw="});
+// pwd == 123
+db.users.insert({"pseudo":"Vincent","email":"vincent.fournie@epyx.ch","fullName":"Vincent Fournié","sha1":"9WEyqIj+E1ko0c/rTM7H5OaSxlY="});
+// pwd == 123
+db.users.insert({"pseudo":"Stefan","email":"stefan.paychere@epyx.ch","fullName":"Stefan Paychère","sha1":"TUVhIzBXAn5XRQb5cZFArQwnbVk="});
+
+db.chatrooms.insert({"_id":"jdc:1001", "refuseAnonymous":true});

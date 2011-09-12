@@ -2,6 +2,7 @@ package ch.windmobile.server.socialmodel.mogodb;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,10 +49,12 @@ public class ITTestChatServiceImpl {
     @Test
     public void testFullChatCycle() throws Exception {
         ServiceLocator locator = new MongoDBServiceLocator().connect(null);
+        MessageDigest md = MessageDigest.getInstance("MD5");
         try {
             ChatService chatService = locator.getService(ChatService.class);
             for (int i = 0; i < 50; i++) {
-                chatService.postMessage("Chat room", "Test user", "Hello, this is message " + i);
+                chatService.postMessage("Chat room", "Test user", "Hello, this is message " + i,
+                    new String(md.digest("test@mycompany.com".getBytes())));
             }
             Messages messages = chatService.findMessages("TEST", 5);
             Assert.assertEquals("Hello, this is message 49", messages.getMessages().get(0).getText());

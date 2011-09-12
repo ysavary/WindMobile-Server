@@ -2,7 +2,6 @@ package ch.windmobile.server.resource;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
@@ -15,9 +14,7 @@ import com.sun.jersey.api.NotFoundException;
 public class StationDataResource {
     private WindMobileDataSource dataSource;
     
-    @Context
     UriInfo uriInfo;
-    @Context
     Request request;
     String stationId;
 

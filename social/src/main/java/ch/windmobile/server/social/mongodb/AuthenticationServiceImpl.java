@@ -27,7 +27,7 @@ public class AuthenticationServiceImpl extends BaseMongoDBService implements Aut
         if (user != null) {
             String b64 = (String) user.get(MongoDBConstants.USER_PROP_SHA1);
             try {
-                boolean ok = new AuthenticationServiceUtil().validateSHA1(email, password.toString(), b64);
+                boolean ok = AuthenticationServiceUtil.validateSHA1(email, password.toString(), b64);
                 if (ok) {
                     return (String) user.get(MongoDBConstants.USER_PROP_ROLE);
                 } else {

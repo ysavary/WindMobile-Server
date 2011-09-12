@@ -2,6 +2,7 @@ package ch.windmobile.server.resource;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -27,11 +28,13 @@ public class ChatRoomListResource {
     UriInfo uriInfo;
     @Context
     Request request;
+    @Context
+    HttpServletRequest servletRequest;
 
     @Path("{chatRoomId}")
     public ChatRoomResource getChatRoom(@PathParam("chatRoomId") String chatRoomId) {
         try {
-            return new ChatRoomResource(uriInfo, request, serviceLocator, chatRoomId);
+            return new ChatRoomResource(uriInfo, request, servletRequest, serviceLocator, chatRoomId);
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;

@@ -7,6 +7,7 @@ public interface MongoDBConstants {
     public static final String CHAT_PROP_COMMENT = "comment";
     public static final String CHAT_PROP_USER = "user";
     public static final String CHAT_PROP_TIME = "time";
+    public static final String CHAT_PROP_EMAIL_HASH = "emailHash";
 
     public static final String COLLECTION_USERS = "users";
     public static final String USER_PROP_EMAIL = "email";
@@ -16,5 +17,6 @@ public interface MongoDBConstants {
     public static final String USER_PROP_ROLE = "role";
     public static final String USER_PROP_FAVORITES = "favorites";
 
-    public static final String COLLECTION_COUNTERS = "counters";
+    public static final String COLLECTION_CHATROOMS = "chatrooms";
+    public static final String CHATROOM_REFUSE_ANONYMOUS = "refuseAnonymous";    
 }

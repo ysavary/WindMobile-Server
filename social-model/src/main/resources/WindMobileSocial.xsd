@@ -60,6 +60,7 @@
             <xs:element name="date" type="xs:dateTime" />
             <xs:element name="pseudo" type="xs:string" />
             <xs:element name="text" type="xs:string" />
+            <xs:element name="emailHash" type="xs:string" />
         </xs:all>
     </xs:complexType>
 </xs:schema>

@@ -2,6 +2,7 @@ package ch.windmobile.server.socialmodel.mogodb;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -48,6 +49,7 @@ public class HeavyLoadTest {
 
     public void testFullChatCycle() throws Exception {
         ServiceLocator locator = new MongoDBServiceLocator().connect(null);
+        final MessageDigest md = MessageDigest.getInstance("MD5");
         try {
             final int CNT = 50000;
             final Executor executor = Executors.newFixedThreadPool(10);
@@ -58,7 +60,8 @@ public class HeavyLoadTest {
                 executor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        chatService.postMessage("Chat room", "Test user", "Hello, this is message " + counter.incrementAndGet());
+                        chatService.postMessage("Chat room", "Test user", "Hello, this is message " + counter.incrementAndGet(),
+                            new String(md.digest("test@mycompany.com".getBytes())));
                         latch.countDown();
                     }
                 });

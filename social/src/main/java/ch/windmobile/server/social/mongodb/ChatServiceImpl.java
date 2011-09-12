@@ -18,8 +18,8 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
-    private static final String counter = "function counter(name) { return db." + MongoDBConstants.COLLECTION_COUNTERS
-        + ".findAndModify({query:{_id:name}, update:{$inc : {counter:1}}, 'new':true, upsert:true}).next; };";
+    private static final String counter = "function counter(name) { return db." + MongoDBConstants.COLLECTION_CHATROOMS
+        + ".findAndModify({query:{_id:name}, update:{$inc : {counter:1}}, new:true, upsert:true}).counter; }";
 
     public ChatServiceImpl(DB database) {
         super(database);
@@ -50,15 +50,17 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
     }
 
     @Override
-    public void postMessage(final String chatRoomId, final String pseudo, final String message) {
-        final String collectionName = computeCollectionName(chatRoomId);
+    public void postMessage(String chatRoomId, String pseudo, String message, String emailHash) {
+        String collectionName = computeCollectionName(chatRoomId);
         DBCollection col = getOrCreateCappedCollection(collectionName);
 
         DBObject chatItem = new BasicDBObject();
-        chatItem.put("_id", db.eval(counter, chatRoomId));
+        Double value = (Double) db.eval(counter, chatRoomId);
+        chatItem.put("_id", value.longValue());
         chatItem.put(MongoDBConstants.CHAT_PROP_COMMENT, message);
         chatItem.put(MongoDBConstants.CHAT_PROP_USER, pseudo);
         chatItem.put(MongoDBConstants.CHAT_PROP_TIME, new DateTime().toDateTimeISO().toString());
+        chatItem.put(MongoDBConstants.CHAT_PROP_EMAIL_HASH, emailHash);
         col.insert(chatItem);
     }
 
@@ -69,18 +71,21 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
         }
         final String collectionName = computeCollectionName(chatRoomId);
 
-        final DBObject fields = BasicDBObjectBuilder.start(MongoDBConstants.CHAT_PROP_USER, 1).add("_id", 0)
-            .add(MongoDBConstants.CHAT_PROP_COMMENT, 1).add(MongoDBConstants.CHAT_PROP_TIME, 1).get();
+        final DBObject fields = BasicDBObjectBuilder.start("_id", 1).add(MongoDBConstants.CHAT_PROP_USER, 1)
+            .add(MongoDBConstants.CHAT_PROP_COMMENT, 1).add(MongoDBConstants.CHAT_PROP_TIME, 1).add(MongoDBConstants.CHAT_PROP_EMAIL_HASH, 1).get();
         DBCursor result = db.getCollection(collectionName).find(null, fields).sort(new BasicDBObject("$natural", -1)).limit(maxCount);
         List<DBObject> all = result.toArray();
 
         Messages messages = new Messages();
         for (DBObject dbObject : all) {
             Message message = new Message();
+            message.setId(dbObject.get("_id").toString());
             DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime((String) dbObject.get("time"));
             message.setDate(dateTime);
             message.setPseudo((String) dbObject.get(MongoDBConstants.CHAT_PROP_USER));
             message.setText((String) dbObject.get(MongoDBConstants.CHAT_PROP_COMMENT));
+            message.setEmailHash((String) dbObject.get(MongoDBConstants.CHAT_PROP_EMAIL_HASH));
+
             messages.getMessages().add(message);
         }
         return messages;
@@ -89,7 +94,7 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
     @Override
     public Long getLastMessageId(String chatRoomId) {
         try {
-            Double value = (Double) db.getCollection(MongoDBConstants.COLLECTION_COUNTERS).findOne(new BasicDBObject("_id", chatRoomId))
+            Double value = (Double) db.getCollection(MongoDBConstants.COLLECTION_CHATROOMS).findOne(new BasicDBObject("_id", chatRoomId))
                 .get("counter");
             return value.longValue();
         } catch (Exception e) {
@@ -104,5 +109,17 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
             returnValue.add(getLastMessageId(chatRoomId));
         }
         return returnValue;
+    }
+
+    @Override
+    public boolean allowAnonymousMessages(String chatRoomId) {
+        try {
+            Boolean refuseAnonymous = (Boolean) db.getCollection(MongoDBConstants.COLLECTION_CHATROOMS).findOne(new BasicDBObject("_id", chatRoomId))
+                .get(MongoDBConstants.CHATROOM_REFUSE_ANONYMOUS);
+
+            return !refuseAnonymous;
+        } catch (Exception e) {
+            return true;
+        }
     }
 }
