@@ -15,6 +15,7 @@ import javax.ws.rs.core.UriInfo;
 
 import ch.windmobile.server.socialmodel.ServiceLocator;
 import ch.windmobile.server.socialmodel.UserService;
+import ch.windmobile.server.socialmodel.xml.Favorite;
 import ch.windmobile.server.socialmodel.xml.Favorites;
 
 public class UserResource {
@@ -39,9 +40,9 @@ public class UserResource {
     public Favorites getFavorites() {
         try {
             UserService userService = serviceLocator.getService(UserService.class);
-            List<String> result = userService.getFavorites(email);
+            List<Favorite> result = userService.getFavorites(email);
             Favorites favorites = new Favorites();
-            favorites.getStationIds().addAll(result);
+            favorites.getFavorites().addAll(result);
             return favorites;
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
@@ -66,9 +67,11 @@ public class UserResource {
     public Favorites addToFavorite(@PathParam("stationId") String stationId) {
         try {
             UserService userService = serviceLocator.getService(UserService.class);
-            List<String> result = userService.addToFavorites(email, Arrays.asList(stationId));
+            Favorite favorite = new Favorite();
+            favorite.setStationId(stationId);
+            List<Favorite> result = userService.addToFavorites(email, Arrays.asList(favorite));
             Favorites favorites = new Favorites();
-            favorites.getStationIds().addAll(result);
+            favorites.getFavorites().addAll(result);
             return favorites;
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
@@ -82,9 +85,11 @@ public class UserResource {
     public Favorites removeFromFavorite(@PathParam("stationId") String stationId) {
         try {
             UserService userService = serviceLocator.getService(UserService.class);
-            List<String> result = userService.removeFromFavorites(email, Arrays.asList(stationId));
+            Favorite favorite = new Favorite();
+            favorite.setStationId(stationId);
+            List<Favorite> result = userService.removeFromFavorites(email, Arrays.asList(favorite));
             Favorites favorites = new Favorites();
-            favorites.getStationIds().addAll(result);
+            favorites.getFavorites().addAll(result);
             return favorites;
         } catch (Exception e) {
             ExceptionHandler.treatException(e);

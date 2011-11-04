@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <name>WindMobile :: Server :: WAR</name>
@@ -68,19 +67,19 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>1.7</version>
+            <version>1.9.1</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>1.7</version>
+            <version>1.9.1</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-spring</artifactId>
-            <version>1.7</version>
-            <!-- jersey-spring 1.6 depends on/uses old spring framework versions -->
+            <version>1.9.1</version>
+            <!-- jersey-spring 1.9 depends on/uses old spring framework versions -->
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework</groupId>
@@ -150,6 +149,20 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- WebSocket -->
+        <dependency>
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-jersey</artifactId>
+            <version>0.8.0-RC3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-jquery</artifactId>
+            <version>0.8.0-RC3</version>
+            <type>war</type>
+        </dependency>        
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
@@ -175,51 +188,13 @@
                     <warName>${war.name}</warName>
                 </configuration>
             </plugin>
-            <!-- plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.0.3</version>
-                <configuration>
-                    <wait>true</wait>
-                    <container>
-                        <containerId>tomcat6x</containerId>
-                        <type>installed</type>
-                        <home>${user.home}/WindMobile/apache-tomcat</home>
-                    </container>
-                    <configuration>
-                        <type>existing</type>
-                        <home>${user.home}/WindMobile/apache-tomcat</home>
-                        <properties>
-                            <cargo.jvmargs><![CDATA[-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n]]></cargo.jvmargs>
-                        </properties>
-                    </configuration>
-                    <deployer>
-                        <type>installed</type>
-                        <deployables>
-                            <deployable>
-                                <location>${project.build.directory}/${war.name}.war</location>
-                            </deployable>
-                        </deployables>
-                    </deployer>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>verify-deploy</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>start</goal>
-                            <goal>deployer-deploy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>clean-undeploy</id>
-                        <phase>pre-clean</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin-->
+            <!-- plugin> <groupId>org.codehaus.cargo</groupId> <artifactId>cargo-maven2-plugin</artifactId> <version>1.0.3</version> <configuration> <wait>true</wait> 
+                <container> <containerId>tomcat6x</containerId> <type>installed</type> <home>${user.home}/WindMobile/apache-tomcat</home> </container> <configuration> 
+                <type>existing</type> <home>${user.home}/WindMobile/apache-tomcat</home> <properties> <cargo.jvmargs><![CDATA[-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n]]></cargo.jvmargs> 
+                </properties> </configuration> <deployer> <type>installed</type> <deployables> <deployable> <location>${project.build.directory}/${war.name}.war</location> 
+                </deployable> </deployables> </deployer> </configuration> <executions> <execution> <id>verify-deploy</id> <phase>install</phase> <goals> <goal>start</goal> 
+                <goal>deployer-deploy</goal> </goals> </execution> <execution> <id>clean-undeploy</id> <phase>pre-clean</phase> <goals> <goal>stop</goal> </goals> </execution> 
+                </executions> </plugin -->
         </plugins>
     </build>
 </project>

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.windmobile.server.socialmodel.UserService;
+import ch.windmobile.server.socialmodel.xml.Favorite;
 import ch.windmobile.server.socialmodel.xml.User;
 
 import com.mongodb.BasicDBObject;
@@ -33,11 +34,11 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         }
         DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
-        DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
-        if (dbObject == null) {
+        DBObject userDb = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
+        if (userDb == null) {
             throw new UserNotFound("Unable to find user with email '" + email + "'");
         }
-        return createUser(dbObject);
+        return createUser(userDb);
     }
 
     @Override
@@ -47,92 +48,130 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         }
         DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by pseudo
-        DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_PSEUDO, pseudo));
-        if (dbObject == null) {
+        DBObject userDb = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_PSEUDO, pseudo));
+        if (userDb == null) {
             throw new UserNotFound("Unable to find user with pseudo '" + pseudo + "'");
         }
-        return createUser(dbObject);
+        return createUser(userDb);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<String> getFavorites(String email) throws UserNotFound {
+    public List<Favorite> getFavorites(String email) throws UserNotFound {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
         DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
-        DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
-        if (dbObject == null) {
+        DBObject userDb = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
+        if (userDb == null) {
             throw new UserNotFound("Unable to find user with email '" + email + "'");
         }
 
-        List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        if (favorites == null) {
-            favorites = new ArrayList<String>();
+        DBObject favoritesDb = (DBObject) userDb.get(MongoDBConstants.USER_PROP_FAVORITES);
+        if (favoritesDb == null) {
+            favoritesDb = new BasicDBObject();
 
-            dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
-            col.save(dbObject);
+            userDb.put(MongoDBConstants.USER_PROP_FAVORITES, favoritesDb);
+            col.save(userDb);
         }
 
-        return favorites;
+        List<Favorite> returnValue = new ArrayList<Favorite>(favoritesDb.keySet().size());
+        for (String stationId : favoritesDb.keySet()) {
+            Favorite favorite = new Favorite();
+            favorite.setStationId(stationId);
+            DBObject favoriteItemsDb = (DBObject) favoritesDb.get(stationId);
+            favorite.setLastMessageId((Long) favoriteItemsDb.get(MongoDBConstants.USER_PROP_FAVORITE_LASTMESSAGEID));
+            returnValue.add(favorite);
+        }
+        return returnValue;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<String> addToFavorites(String email, List<String> favoritesToAdd) throws UserNotFound {
+    public List<Favorite> addToFavorites(String email, List<Favorite> localFavorites) throws UserNotFound {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
         DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
-        DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
-        if (dbObject == null) {
+        DBObject userDb = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
+        if (userDb == null) {
             throw new UserNotFound("Unable to find user with email '" + email + "'");
         }
 
-        List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        if (favorites == null) {
-            favorites = new ArrayList<String>();
+        DBObject favoritesDb = (DBObject) userDb.get(MongoDBConstants.USER_PROP_FAVORITES);
+        if (favoritesDb == null) {
+            favoritesDb = new BasicDBObject();
         }
 
-        if (favoritesToAdd != null) {
-            favorites.addAll(favoritesToAdd);
-        }
-        dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
-        col.save(dbObject);
+        if (localFavorites != null) {
+            for (Favorite localFavorite : localFavorites) {
+                DBObject favoriteItemsDb = (DBObject) favoritesDb.get(localFavorite.getStationId());
+                long lastMessageIdDb = -1;
+                if (favoriteItemsDb == null) {
+                    favoriteItemsDb = new BasicDBObject();
+                } else {
+                    if (favoriteItemsDb.containsField(MongoDBConstants.USER_PROP_FAVORITE_LASTMESSAGEID)) {
+                        lastMessageIdDb = (Long) favoriteItemsDb.get(MongoDBConstants.USER_PROP_FAVORITE_LASTMESSAGEID);
+                    }
+                }
 
-        return favorites;
+                favoriteItemsDb.put(MongoDBConstants.USER_PROP_FAVORITE_LASTMESSAGEID, Math.max(lastMessageIdDb, localFavorite.getLastMessageId()));
+                favoritesDb.put(localFavorite.getStationId(), favoriteItemsDb);
+            }
+        }
+        userDb.put(MongoDBConstants.USER_PROP_FAVORITES, favoritesDb);
+        col.save(userDb);
+
+        List<Favorite> returnValue = new ArrayList<Favorite>(favoritesDb.keySet().size());
+        for (String stationId : favoritesDb.keySet()) {
+            Favorite favorite = new Favorite();
+            favorite.setStationId(stationId);
+            DBObject favoriteItemDb = (DBObject) favoritesDb.get(stationId);
+            favorite.setLastMessageId((Long) favoriteItemDb.get(MongoDBConstants.USER_PROP_FAVORITE_LASTMESSAGEID));
+            returnValue.add(favorite);
+        }
+        return returnValue;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<String> removeFromFavorites(String email, List<String> favoritesToRemove) throws UserNotFound {
+    public List<Favorite> removeFromFavorites(String email, List<Favorite> favoritesToRemove) throws UserNotFound {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
         DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
-        DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
-        if (dbObject == null) {
+        DBObject userDb = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
+        if (userDb == null) {
             throw new UserNotFound("Unable to find user with email '" + email + "'");
         }
 
-        List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        if (favorites == null) {
-            favorites = new ArrayList<String>();
+        DBObject favoritesDb = (DBObject) userDb.get(MongoDBConstants.USER_PROP_FAVORITES);
+        if (favoritesDb == null) {
+            favoritesDb = new BasicDBObject();
         }
 
         if (favoritesToRemove != null) {
-            favorites.removeAll(favoritesToRemove);
+            for (Favorite favoriteToRemove : favoritesToRemove) {
+                DBObject favoriteItemsDb = (DBObject) favoritesDb.get(favoriteToRemove.getStationId());
+                if (favoriteItemsDb != null) {
+                    favoritesDb.removeField(favoriteToRemove.getStationId());
+                }
+            }
         }
-        dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
-        col.save(dbObject);
+        userDb.put(MongoDBConstants.USER_PROP_FAVORITES, favoritesDb);
+        col.save(userDb);
 
-        return favorites;
+        List<Favorite> returnValue = new ArrayList<Favorite>(favoritesDb.keySet().size());
+        for (String stationId : favoritesDb.keySet()) {
+            Favorite favorite = new Favorite();
+            favorite.setStationId(stationId);
+            DBObject favoriteItemDb = (DBObject) favoritesDb.get(stationId);
+            favorite.setLastMessageId((Long) favoriteItemDb.get(MongoDBConstants.USER_PROP_FAVORITE_LASTMESSAGEID));
+            returnValue.add(favorite);
+        }
+        return returnValue;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void clearFavorites(String email) throws UserNotFound {
         if (email == null) {
@@ -140,19 +179,12 @@ public class UserServiceImpl extends BaseMongoDBService implements UserService {
         }
         DBCollection col = db.getCollection(MongoDBConstants.COLLECTION_USERS);
         // Search user by email
-        DBObject dbObject = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
-        if (dbObject == null) {
+        DBObject userDb = col.findOne(new BasicDBObject(MongoDBConstants.USER_PROP_EMAIL, email));
+        if (userDb == null) {
             throw new UserNotFound("Unable to find user with email '" + email + "'");
         }
 
-        List<String> favorites = (List<String>) dbObject.get(MongoDBConstants.USER_PROP_FAVORITES);
-        if (favorites == null) {
-            favorites = new ArrayList<String>();
-        } else {
-            favorites.clear();
-        }
-
-        dbObject.put(MongoDBConstants.USER_PROP_FAVORITES, favorites);
-        col.save(dbObject);
+        userDb.removeField(MongoDBConstants.USER_PROP_FAVORITES);
+        col.save(userDb);
     }
 }

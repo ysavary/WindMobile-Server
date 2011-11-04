@@ -14,7 +14,13 @@
 
     <!-- Root element -->
     <xs:element name="user" type="User" />
-    <xs:element name="favorites" type="Favorites" />
+    <xs:element name="favorites">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="favorite" type="Favorite" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="messages">
         <xs:complexType>
             <xs:sequence>
@@ -30,8 +36,8 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-	
-	<!-- User object -->
+
+    <!-- User object -->
     <xs:complexType name="User">
         <xs:all>
             <xs:element name="email" type="xs:string" />
@@ -39,19 +45,19 @@
             <xs:element name="fullName" type="xs:string" />
             <xs:element name="password" type="xs:string" />
             <xs:element name="role" type="xs:string" />
-            <xs:element name="favorites" type="Favorites" />
         </xs:all>
     </xs:complexType>
 
-    <xs:complexType name="Favorites">
-        <xs:sequence>
-            <xs:element name="stationId" type="xs:string" maxOccurs="unbounded" />
-        </xs:sequence>
+    <xs:complexType name="Favorite">
+        <xs:all>
+            <xs:element name="stationId" type="xs:string" />
+            <xs:element name="lastMessageId" type="MessageId" />
+        </xs:all>
     </xs:complexType>
 
     <xs:simpleType name="MessageId">
         <xs:restriction base="xs:long">
-            <xs:minInclusive value="1" />
+            <xs:minInclusive value="-1" />
         </xs:restriction>
     </xs:simpleType>
     <xs:complexType name="Message">
