@@ -81,7 +81,12 @@ public class ChatRoomResource {
             byte[] emailHashBytes = md.digest(email.trim().toLowerCase().getBytes());
             StringBuffer hexBuffer = new StringBuffer();
             for (int i = 0; i < emailHashBytes.length; i++) {
-                hexBuffer.append(Integer.toHexString(0xFF & emailHashBytes[i]));
+                String hex = Integer.toHexString(0xFF & emailHashBytes[i]);
+                if (hex.length() == 1) {
+                    hexBuffer.append("0" + hex);
+                } else {
+                    hexBuffer.append(hex);
+                }
             }
             emailHash = hexBuffer.toString();
 
