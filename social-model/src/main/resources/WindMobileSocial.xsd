@@ -21,6 +21,7 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+    <xs:element name="message" type="Message" />
     <xs:element name="messages">
         <xs:complexType>
             <xs:sequence>

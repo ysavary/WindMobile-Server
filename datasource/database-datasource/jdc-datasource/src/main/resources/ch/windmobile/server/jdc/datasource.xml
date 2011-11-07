@@ -4,7 +4,7 @@
 
     <!-- BoneCP configuration -->
     <bean id="jdcJdbcPooledDataSource" class="com.jolbox.bonecp.BoneCPDataSource" destroy-method="close">
-        <property name="driverClass" value="org.hibernate.dialect.MySQL5Dialect" />
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />
         <property name="jdbcUrl" value="${jdc.jdbc.url}" />
         <property name="username" value="${jdc.jdbc.username}" />
         <property name="password" value="${jdc.jdbc.password}" />
@@ -15,7 +15,7 @@
         <property name="maxConnectionsPerPartition" value="10" />
         <property name="acquireIncrement" value="2" />
         <property name="connectionTimeoutInMs" value="20000" />
-        
+
         <!-- MySQL driver "Connector/J" properties -->
         <property name="driverProperties">
             <props>
@@ -23,7 +23,16 @@
             </props>
         </property>
     </bean>
-    
+
+    <!-- Tomcat 7 pooled datasource
+    <bean id="_jdcJdbcPooledDataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="${jdc.jdbc.url}" />
+        <property name="username" value="${jdc.jdbc.username}" />
+        <property name="password" value="${jdc.jdbc.password}" />
+    </bean>
+    -->
+
     <!-- Spring bean configuration. Tell Spring to bounce off BoneCP -->
     <bean id="jdcJdbcDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
         <property name="targetDataSource">

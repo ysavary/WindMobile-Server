@@ -6,8 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
@@ -43,6 +45,7 @@ public class ChatRoomListResource {
 
     @GET
     @Path("lastmessages")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public MessageIds getLastMessageId(@QueryParam("chatRoomId") List<String> chatRoomIds) {
         try {
             ChatService chatService = serviceLocator.getService(ChatService.class);

@@ -36,7 +36,7 @@ public class ExceptionHandler {
         }
     }
 
-    static void treatException(Throwable e) throws WebApplicationException {
+    public static void treatException(Throwable e) throws WebApplicationException {
         logError(e);
 
         if (e instanceof WebApplicationException) {

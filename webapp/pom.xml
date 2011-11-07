@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <name>WindMobile :: Server :: WAR</name>
-    <description>WindMobile web application</description>
+    <description>WindMobile WAR</description>
 
     <groupId>ch.windmobile</groupId>
-    <artifactId>windmobile-webapp</artifactId>
+    <artifactId>windmobile-war</artifactId>
     <packaging>war</packaging>
 
     <parent>
@@ -156,12 +157,6 @@
             <artifactId>atmosphere-jersey</artifactId>
             <version>0.8.0-RC3</version>
         </dependency>
-        <dependency>
-            <groupId>org.atmosphere</groupId>
-            <artifactId>atmosphere-jquery</artifactId>
-            <version>0.8.0-RC3</version>
-            <type>war</type>
-        </dependency>        
 
         <dependency>
             <groupId>org.slf4j</groupId>

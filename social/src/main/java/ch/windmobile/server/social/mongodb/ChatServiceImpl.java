@@ -50,18 +50,28 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
     }
 
     @Override
-    public void postMessage(String chatRoomId, String pseudo, String message, String emailHash) {
+    public Message postMessage(String chatRoomId, String pseudo, String text, String emailHash) {
         String collectionName = computeCollectionName(chatRoomId);
         DBCollection col = getOrCreateCappedCollection(collectionName);
 
         DBObject chatItem = new BasicDBObject();
-        Double value = (Double) db.eval(counter, chatRoomId);
-        chatItem.put("_id", value.longValue());
-        chatItem.put(MongoDBConstants.CHAT_PROP_COMMENT, message);
+        Double id = (Double) db.eval(counter, chatRoomId);
+        chatItem.put("_id", id.longValue());
+        chatItem.put(MongoDBConstants.CHAT_PROP_TEXT, text);
         chatItem.put(MongoDBConstants.CHAT_PROP_USER, pseudo);
-        chatItem.put(MongoDBConstants.CHAT_PROP_TIME, new DateTime().toDateTimeISO().toString());
+        DateTime date = new DateTime().toDateTimeISO();
+        chatItem.put(MongoDBConstants.CHAT_PROP_TIME, date.toString());
         chatItem.put(MongoDBConstants.CHAT_PROP_EMAIL_HASH, emailHash);
         col.insert(chatItem);
+
+        Message message = new Message();
+        message.setId(id.toString());
+        message.setDate(date);
+        message.setPseudo(pseudo);
+        message.setText(text);
+        message.setEmailHash(emailHash);
+
+        return message;
     }
 
     @Override
@@ -72,7 +82,7 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
         final String collectionName = computeCollectionName(chatRoomId);
 
         final DBObject fields = BasicDBObjectBuilder.start("_id", 1).add(MongoDBConstants.CHAT_PROP_USER, 1)
-            .add(MongoDBConstants.CHAT_PROP_COMMENT, 1).add(MongoDBConstants.CHAT_PROP_TIME, 1).add(MongoDBConstants.CHAT_PROP_EMAIL_HASH, 1).get();
+            .add(MongoDBConstants.CHAT_PROP_TEXT, 1).add(MongoDBConstants.CHAT_PROP_TIME, 1).add(MongoDBConstants.CHAT_PROP_EMAIL_HASH, 1).get();
         DBCursor result = db.getCollection(collectionName).find(null, fields).sort(new BasicDBObject("$natural", -1)).limit(maxCount);
         List<DBObject> all = result.toArray();
 
@@ -83,7 +93,7 @@ public class ChatServiceImpl extends BaseMongoDBService implements ChatService {
             DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime((String) dbObject.get("time"));
             message.setDate(dateTime);
             message.setPseudo((String) dbObject.get(MongoDBConstants.CHAT_PROP_USER));
-            message.setText((String) dbObject.get(MongoDBConstants.CHAT_PROP_COMMENT));
+            message.setText((String) dbObject.get(MongoDBConstants.CHAT_PROP_TEXT));
             message.setEmailHash((String) dbObject.get(MongoDBConstants.CHAT_PROP_EMAIL_HASH));
 
             messages.getMessages().add(message);

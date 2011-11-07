@@ -4,7 +4,7 @@ public interface MongoDBConstants {
 	public final static String DATABASE_NAME = "windmobile";
 
 	public static final String COLLECTION_CHAT_ROOM_PREFIX = "chatroom_";
-	public static final String CHAT_PROP_COMMENT = "comment";
+	public static final String CHAT_PROP_TEXT = "text";
 	public static final String CHAT_PROP_USER = "user";
 	public static final String CHAT_PROP_TIME = "time";
 	public static final String CHAT_PROP_EMAIL_HASH = "emailHash";

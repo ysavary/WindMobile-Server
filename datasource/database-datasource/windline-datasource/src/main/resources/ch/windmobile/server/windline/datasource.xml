@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    
+
     <!-- BoneCP configuration -->
     <bean id="windlineJdbcPooledDataSource" class="com.jolbox.bonecp.BoneCPDataSource" destroy-method="close">
-        <property name="driverClass" value="org.hibernate.dialect.MySQL5Dialect" />
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />
         <property name="jdbcUrl" value="${windline.jdbc.url}" />
         <property name="username" value="${windline.jdbc.username}" />
         <property name="password" value="${windline.jdbc.password}" />
@@ -15,7 +15,7 @@
         <property name="maxConnectionsPerPartition" value="10" />
         <property name="acquireIncrement" value="2" />
         <property name="connectionTimeoutInMs" value="20000" />
-        
+
         <!-- MySQL driver "Connector/J" properties -->
         <property name="driverProperties">
             <props>
@@ -23,7 +23,16 @@
             </props>
         </property>
     </bean>
-    
+
+    <!-- Tomcat 7 pooled datasource
+    <bean id="_windlineJdbcPooledDataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="${windline.jdbc.url}" />
+        <property name="username" value="${windline.jdbc.username}" />
+        <property name="password" value="${windline.jdbc.password}" />
+    </bean>
+    -->
+
     <!-- Spring bean configuration. Tell Spring to bounce off BoneCP -->
     <bean id="windlineJdbcDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
         <property name="targetDataSource">

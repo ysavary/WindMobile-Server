@@ -2,6 +2,7 @@ package ch.windmobile.server.socialmodel;
 
 import java.util.List;
 
+import ch.windmobile.server.socialmodel.xml.Message;
 import ch.windmobile.server.socialmodel.xml.Messages;
 
 /**
@@ -10,7 +11,7 @@ import ch.windmobile.server.socialmodel.xml.Messages;
  */
 public interface ChatService {
 
-    void postMessage(String chatRoomId, String pseudo, String message, String emailHash);
+    Message postMessage(String chatRoomId, String pseudo, String message, String emailHash);
 
     /**
      * @param chatRoomId

@@ -33,12 +33,8 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>WindMobile REST Service</servlet-name>
-        <url-pattern>/v1/*</url-pattern>
-    </servlet-mapping>
     <servlet>
-        <servlet-name>Test</servlet-name>
+        <servlet-name>Atmosphere Chat</servlet-name>
         <servlet-class>org.atmosphere.cpr.AtmosphereServlet</servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
@@ -47,7 +43,11 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Test</servlet-name>
-        <url-pattern>/v2/*</url-pattern>
+        <servlet-name>Atmosphere Chat</servlet-name>
+        <url-pattern>/chat/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>WindMobile REST Service</servlet-name>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
 </web-app>

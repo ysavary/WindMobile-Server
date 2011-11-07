@@ -26,6 +26,7 @@ import ch.windmobile.server.security.WindMobileAuthenticationProvider;
 import ch.windmobile.server.socialmodel.ChatService;
 import ch.windmobile.server.socialmodel.ServiceLocator;
 import ch.windmobile.server.socialmodel.UserService;
+import ch.windmobile.server.socialmodel.xml.Message;
 import ch.windmobile.server.socialmodel.xml.Messages;
 import ch.windmobile.server.socialmodel.xml.ObjectFactory;
 import ch.windmobile.server.socialmodel.xml.User;
@@ -52,7 +53,7 @@ public class ChatRoomResource {
     @Path("postmessage")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public void postMessage(String message) {
+    public Message postMessage(String message) {
         try {
             String email;
             String pseudo;
@@ -90,9 +91,10 @@ public class ChatRoomResource {
             }
             emailHash = hexBuffer.toString();
 
-            chatService.postMessage(chatRoomId, pseudo, message, emailHash);
+            return chatService.postMessage(chatRoomId, pseudo, message, emailHash);
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
+            return null;
         }
     }
 

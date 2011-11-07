@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    
+    <script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
+    <script type="text/javascript" src="jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+        	
+            var urlParams = {};
+            (function () {
+                var e,
+                    a = /\+/g,  // Regex for replacing addition symbol with a space
+                    r = /([^&=]+)=?([^&]*)/g,
+                    d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+                    q = window.location.search.substring(1);
+
+                while (e = r.exec(q))
+                   urlParams[d(e[1])] = d(e[2]);
+            })();
+            
+            var connectedEndpoint;
+            var callbackAdded = false;
+
+            
+            function subscribe(topic) {
+                // jquery.atmosphere.response
+                function callback(response) {
+                    // Websocket events.
+                    $.atmosphere.log('info', ["response.state: " + response.state]);
+                    $.atmosphere.log('info', ["response.transport: " + response.transport]);
+                    $.atmosphere.log('info', ["response.status: " + response.status]);
+
+                    if (response.transport != 'polling' && response.state != 'connected' && response.state != 'closed') {
+                        $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
+                        if (response.status == 200) {
+                            var data = response.responseBody;
+                            if (data.length > 0) {
+                            	var message = $.parseJSON(data);
+                                $('#messages').prepend($("<div class='message'></div>").text(message.text));
+                            }
+                        }
+                    }
+                }
+
+                var location = 'http://localhost:1588/windmobile/chat/' + topic;
+                $.atmosphere.subscribe(location, !callbackAdded ? callback : null,
+                		$.atmosphere.request = { transport: 'websocket', headers: { accept: 'application/json' } });
+                
+                connectedEndpoint = $.atmosphere.response;
+                callbackAdded = true;
+            }
+
+            function unsubscribe(){
+                $.atmosphere.unsubscribe();
+            }
+            
+            function pushMessage(topic, message) {
+                connectedEndpoint.push('http://localhost:1588/windmobile/chat/' + topic,
+                        null,
+                        $.atmosphere.request = { data: 'message=' + message, headers: { accept: 'application/json' } } );
+            }
+            
+            $("#sendMessage").click(function(event) {
+            	pushMessage(urlParams["topic"], $("#text").val());
+                return false;
+            });
+            
+            subscribe(urlParams["topic"]);
+        });
+    </script>
+</head>
+<body>
+	<h1>WindMobile Chat Client</h1>
+	
+    <div id='messages'></div>
+	
+	<br />
+
+	<div>
+		<input id='text' type='text' />
+		<input id='sendMessage' class='button' type='submit' name='Send' value='Send message' />
+	</div>
+</body>
+</html>

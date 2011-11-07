@@ -18,6 +18,7 @@
         <module>social</module>
         <module>webapp</module>
         <module>integration-test</module>
+        <module>chat-client</module>
     </modules>
 
     <properties>
