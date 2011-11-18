@@ -16,9 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.atmosphere.annotation.Broadcast;
-import org.atmosphere.annotation.Suspend;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.jersey.Broadcastable;
+import org.atmosphere.jersey.SuspendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,32 +43,31 @@ public class AtmosphereChat {
     private ServiceLocator serviceLocator = new MongoDBServiceLocator();
 
     private @PathParam("chatRoomId")
-    Broadcaster chatRoomId;
+    Broadcaster chatRoom;
 
     @Context
     HttpServletRequest servletRequest;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Suspend(listeners = { AtmosphereLogger.class })
-    public Broadcastable subscribe() {
-        return new Broadcastable(chatRoomId);
+    public SuspendResponse<String> subscribe() {
+        return new SuspendResponse.SuspendResponseBuilder<String>().broadcaster(chatRoom).addListener(new AtmosphereLogger()).build();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Broadcast
-    public Broadcastable postMessage(@FormParam("message") String message, @FormParam("emailHash") String emailHash) {
+    public Broadcastable postMessage(@FormParam("message") String text, @FormParam("emailHash") String emailHash) {
         try {
             String email;
             String pseudo;
 
             ChatService chatService = serviceLocator.connect(null).getService(ChatService.class);
             if (SecurityHelper.hasRole(WindMobileAuthenticationProvider.roleUser) == false) {
-                if (chatService.allowAnonymousMessages(chatRoomId.getID()) == false) {
+                if (chatService.allowAnonymousMessages(chatRoom.getID()) == false) {
                     Error error = new Error();
                     error.setCode(DataSourceException.Error.UNAUTHORIZED.getCode());
-                    error.setMessage("Chat room '" + chatRoomId + "' does not allow anonymous message");
+                    error.setMessage("Chat room '" + chatRoom + "' does not allow anonymous message");
                     throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_UNAUTHORIZED).entity(error).build());
                 }
 
@@ -98,8 +97,8 @@ public class AtmosphereChat {
                 emailHash = hexBuffer.toString();
             }
 
-            Message message2 = chatService.postMessage(chatRoomId.getID(), pseudo, message, emailHash);
-            return new Broadcastable(message2, chatRoomId);
+            Message message2 = chatService.postMessage(chatRoom.getID(), pseudo, text, emailHash);
+            return new Broadcastable(message2, "", chatRoom);
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;

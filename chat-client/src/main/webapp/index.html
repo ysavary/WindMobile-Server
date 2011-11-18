@@ -7,7 +7,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     
     <script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
-    <script type="text/javascript" src="jquery/jquery.form.js"></script>
     <script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
 
     <script type="text/javascript">
@@ -27,9 +26,13 @@
             
             var connectedEndpoint;
             var callbackAdded = false;
-
             
-            function subscribe(topic) {
+            function getChatApiUrl(chatroom) {
+            	var loc = window.location;
+            	return loc.protocol + '//' + loc.hostname + ':' + loc.port + "/" + 'windmobile/chat/' + chatroom; 
+            }
+            
+            function subscribe(chatroom) {
                 // jquery.atmosphere.response
                 function callback(response) {
                     // Websocket events.
@@ -42,15 +45,17 @@
                         if (response.status == 200) {
                             var data = response.responseBody;
                             if (data.length > 0) {
-                            	var message = $.parseJSON(data);
-                                $('#messages').prepend($("<div class='message'></div>").text(message.text));
+                            	try {
+                            		var message = $.parseJSON(data);
+                                	$('#messages').prepend($("<div class='message'></div>").text(message.date + " -> " + message.pseudo + " : " + message.text));
+                                } catch(error) {
+                                }
                             }
                         }
                     }
                 }
 
-                var location = 'http://localhost:1588/windmobile/chat/' + topic;
-                $.atmosphere.subscribe(location, !callbackAdded ? callback : null,
+                $.atmosphere.subscribe(getChatApiUrl(chatroom), !callbackAdded ? callback : null,
                 		$.atmosphere.request = { transport: 'websocket', headers: { accept: 'application/json' } });
                 
                 connectedEndpoint = $.atmosphere.response;
@@ -61,18 +66,28 @@
                 $.atmosphere.unsubscribe();
             }
             
-            function pushMessage(topic, message) {
-                connectedEndpoint.push('http://localhost:1588/windmobile/chat/' + topic,
+            function pushMessage(chatroom, message) {
+                connectedEndpoint.push(getChatApiUrl(chatroom),
                         null,
                         $.atmosphere.request = { data: 'message=' + message, headers: { accept: 'application/json' } } );
             }
             
             $("#sendMessage").click(function(event) {
-            	pushMessage(urlParams["topic"], $("#text").val());
+            	pushMessage(urlParams["chatroom"], $("#text").val());
                 return false;
             });
             
-            subscribe(urlParams["topic"]);
+            /*
+            if (urlParams["chatroom"]) {
+            	subscribe(urlParams["chatroom"]);
+            } else {
+            	alert("No chat room selected");
+            }
+            */
+            $("#connect").click(function(event) {
+            	subscribe(urlParams["chatroom"]);
+                return false;
+            });
         });
     </script>
 </head>
@@ -82,6 +97,10 @@
     <div id='messages'></div>
 	
 	<br />
+	
+	<div>
+		<input id='connect' class='button' type='submit' name='Connect' value='Connect' />
+	</div>
 
 	<div>
 		<input id='text' type='text' />
