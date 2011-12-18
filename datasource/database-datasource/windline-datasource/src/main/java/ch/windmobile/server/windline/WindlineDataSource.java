@@ -56,6 +56,7 @@ public class WindlineDataSource implements WindMobileDataSource {
 
     private static final String STATUS_OFFLINE = "offline";
     private static final String STATUS_DEMO = "demo";
+    private static float conversionFactor = 3.6f;
 
     // 1 hour by default
     private int historicDuration = 60 * 60;
@@ -375,12 +376,12 @@ public class WindlineDataSource implements WindMobileDataSource {
         stationData.setStatus(getStatus(session, station, now, expirationDate));
 
         // Wind average
-        double windAverage = getData(session, station, DataTypeConstant.windAverage.getId()) * 3.6;
-        stationData.setWindAverage((float) windAverage);
+        float windAverage = getData(session, station, DataTypeConstant.windAverage.getId()) * conversionFactor;
+        stationData.setWindAverage(windAverage);
 
         // Wind max
-        double windMax = getData(session, station, DataTypeConstant.windMax.getId()) * 3.6;
-        stationData.setWindMax((float) windMax);
+        float windMax = getData(session, station, DataTypeConstant.windMax.getId()) * conversionFactor;
+        stationData.setWindMax(windMax);
 
         // Wind direction chart
         List<Data> windDirectionDatas = getHistoricData(session, station, DataTypeConstant.windDirection.getId(), getHistoricDuration());
@@ -395,10 +396,11 @@ public class WindlineDataSource implements WindMobileDataSource {
         List<Data> windAverageDatas = getHistoricData(session, station, DataTypeConstant.windAverage.getId(), getHistoricDuration());
         double minValue = Double.MAX_VALUE;
         double sum = 0;
-        // double[][] windTrendAverageDatas = new double[windAverageDatas.size()][2];
+        // double[][] windTrendAverageDatas = new
+        // double[windAverageDatas.size()][2];
         for (int i = 0; i < windAverageDatas.size(); i++) {
             Data data = windAverageDatas.get(i);
-            float floatValue = Float.parseFloat(data.getValue());
+            float floatValue = Float.parseFloat(data.getValue()) * conversionFactor;
             minValue = Math.min(minValue, floatValue);
             sum += floatValue;
             // windTrendAverageDatas[i][0] = data.getTime().getTime();
@@ -413,7 +415,7 @@ public class WindlineDataSource implements WindMobileDataSource {
         double[][] windTrendMaxDatas = new double[windMaxDatas.size()][2];
         for (int i = 0; i < windMaxDatas.size(); i++) {
             Data data = windMaxDatas.get(i);
-            float floatValue = Float.parseFloat(data.getValue());
+            float floatValue = Float.parseFloat(data.getValue()) * conversionFactor;
             maxValue = Math.max(maxValue, floatValue);
             windTrendMaxDatas[i][0] = data.getTime().getTime();
             windTrendMaxDatas[i][1] = floatValue;
@@ -483,11 +485,11 @@ public class WindlineDataSource implements WindMobileDataSource {
 
             // Wind historic chart
             List<Data> windAverageDatas = getHistoricData(session, station, DataTypeConstant.windAverage.getId(), duration);
-            Serie windAverageSerie = createSerie(windAverageDatas, 3.6f);
+            Serie windAverageSerie = createSerie(windAverageDatas, conversionFactor);
             windAverageSerie.setName(DataTypeConstant.windAverage.getName());
 
             List<Data> windMaxDatas = getHistoricData(session, station, DataTypeConstant.windMax.getId(), duration);
-            Serie windMaxSerie = createSerie(windMaxDatas, 3.6f);
+            Serie windMaxSerie = createSerie(windMaxDatas, conversionFactor);
             windMaxSerie.setName(DataTypeConstant.windMax.getName());
 
             List<Data> windDirectionDatas = getHistoricData(session, station, DataTypeConstant.windDirection.getId(), duration);
