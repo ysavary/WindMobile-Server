@@ -22,16 +22,15 @@ import java.security.MessageDigest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBElement;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -44,7 +43,6 @@ import ch.windmobile.server.socialmodel.ServiceLocator;
 import ch.windmobile.server.socialmodel.UserService;
 import ch.windmobile.server.socialmodel.xml.Message;
 import ch.windmobile.server.socialmodel.xml.Messages;
-import ch.windmobile.server.socialmodel.xml.ObjectFactory;
 import ch.windmobile.server.socialmodel.xml.User;
 
 public class ChatRoomResource {
@@ -66,7 +64,6 @@ public class ChatRoomResource {
     }
 
     @POST
-    @Path("postmessage")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Message postMessage(String message) {
@@ -115,10 +112,12 @@ public class ChatRoomResource {
     }
 
     @GET
-    @Path("lastmessages/{maxCount}")
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON + ";charset=UTF-8" })
-    public Messages getMessages(@PathParam("maxCount") int maxCount) {
+    public Messages getMessages(@QueryParam("maxCount") Integer maxCount) {
         try {
+            if (maxCount == null) {
+                maxCount = 5;
+            }
             ChatService chatService = serviceLocator.getService(ChatService.class);
             return chatService.findMessages(chatRoomId, maxCount);
         } catch (Exception e) {
@@ -127,13 +126,13 @@ public class ChatRoomResource {
         }
     }
 
-    @GET
-    @Path("lastmessage")
+    @HEAD
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public JAXBElement<Long> getLastMessageId() {
+    public Response getLastMessageId() {
         try {
             ChatService chatService = serviceLocator.getService(ChatService.class);
-            return new ObjectFactory().createMessageId(chatService.getLastMessageId(chatRoomId));
+            Long lastMessageId = chatService.getLastMessageId(chatRoomId);
+            return Response.ok().header("Message-Id", lastMessageId).build();
         } catch (Exception e) {
             ExceptionHandler.treatException(e);
             return null;
