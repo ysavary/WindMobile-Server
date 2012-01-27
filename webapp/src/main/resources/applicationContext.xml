@@ -35,4 +35,7 @@
 
     <!-- The REST service searches for this bean -->
     <bean id="serviceLocator" class="ch.windmobile.server.social.mongodb.MongoDBServiceLocator" />
+    
+    <!--  Custom JAXB context resolver that enables the "natural" json generator -->
+    <bean scope="singleton" class="ch.windmobile.server.config.CustomJAXBContextResolver" />
 </beans>
