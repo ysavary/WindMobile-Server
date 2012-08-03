@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
@@ -113,11 +114,8 @@ public class ChatRoomResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON + ";charset=UTF-8" })
-    public Messages getMessages(@QueryParam("maxCount") Integer maxCount) {
+    public Messages getMessages(@DefaultValue("5") @QueryParam("maxCount") int maxCount) {
         try {
-            if (maxCount == null) {
-                maxCount = 5;
-            }
             ChatService chatService = serviceLocator.getService(ChatService.class);
             return chatService.findMessages(chatRoomId, maxCount);
         } catch (Exception e) {

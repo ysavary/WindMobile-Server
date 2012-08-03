@@ -6,8 +6,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     
-    <script type="text/javascript" src="jquery/jquery-1.6.4.js"></script>
-    <script type="text/javascript" src="jquery/jquery.atmosphere.js"></script>
+    <script type="text/javascript" src="jquery/jquery-1.7.2.min.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -24,52 +23,39 @@
                    urlParams[d(e[1])] = d(e[2]);
             })();
             
-            var connectedEndpoint;
-            var callbackAdded = false;
-            
             function getChatApiUrl(chatroom) {
             	var loc = window.location;
-            	return loc.protocol + '//' + loc.hostname + ':' + loc.port + "/" + 'windmobile/chat/' + chatroom; 
+            	return loc.protocol + '//' + loc.hostname + ':' + loc.port + "/" + 'windmobile/chatrooms/' + chatroom; 
             }
             
-            function subscribe(chatroom) {
-                // jquery.atmosphere.response
-                function callback(response) {
-                    // Websocket events.
-                    $.atmosphere.log('info', ["response.state: " + response.state]);
-                    $.atmosphere.log('info', ["response.transport: " + response.transport]);
-                    $.atmosphere.log('info', ["response.status: " + response.status]);
-
-                    if (response.transport != 'polling' && response.state != 'connected' && response.state != 'closed') {
-                        $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
-                        if (response.status == 200) {
-                            var data = response.responseBody;
-                            if (data.length > 0) {
-                            	try {
-                            		var message = $.parseJSON(data);
-                                	$('#messages').prepend($("<div class='message'></div>").text(message.date + " -> " + message.pseudo + " : " + message.text));
-                                } catch(error) {
-                                }
-                            }
-                        }
-                    }
-                }
-
-                $.atmosphere.subscribe(getChatApiUrl(chatroom), !callbackAdded ? callback : null,
-                		$.atmosphere.request = { transport: 'websocket', headers: { accept: 'application/json' } });
-                
-                connectedEndpoint = $.atmosphere.response;
-                callbackAdded = true;
+            function displayMessage(message) {
+                $('#messages').prepend($("<div class='message'></div>").text(message.date + " -> " + message.pseudo + " : " + message.text));
             }
-
-            function unsubscribe(){
-                $.atmosphere.unsubscribe();
+            
+            function displayMessages(data) {
+            	for (var i = 0; i < data.message.length; i++) {
+            		displayMessage(data.message[i]);
+            	}
+            }
+            
+            function refresh(chatroom) {
+                $.ajax({
+                    type: 'GET',
+                    url: getChatApiUrl(chatroom),
+                    dataType: 'json',
+                    success: displayMessages
+                });
             }
             
             function pushMessage(chatroom, message) {
-                connectedEndpoint.push(getChatApiUrl(chatroom),
-                        null,
-                        $.atmosphere.request = { data: 'message=' + message, headers: { accept: 'application/json' } } );
+            	$.ajax({
+            		  type: 'POST',
+            		  url: getChatApiUrl(chatroom),
+            		  data: message,
+            		  contentType : 'text/plain',
+                      dataType: 'json',
+            		  success: displayMessage
+            	});
             }
             
             $("#sendMessage").click(function(event) {
@@ -77,17 +63,11 @@
                 return false;
             });
             
-            /*
             if (urlParams["chatroom"]) {
-            	subscribe(urlParams["chatroom"]);
+            	refresh(urlParams["chatroom"]);
             } else {
             	alert("No chat room selected");
             }
-            */
-            $("#connect").click(function(event) {
-            	subscribe(urlParams["chatroom"]);
-                return false;
-            });
         });
     </script>
 </head>
@@ -97,10 +77,6 @@
     <div id='messages'></div>
 	
 	<br />
-	
-	<div>
-		<input id='connect' class='button' type='submit' name='Connect' value='Connect' />
-	</div>
 
 	<div>
 		<input id='text' type='text' />
