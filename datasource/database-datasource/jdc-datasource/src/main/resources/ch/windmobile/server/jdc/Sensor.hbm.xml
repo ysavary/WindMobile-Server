@@ -11,9 +11,6 @@
             <column name="sensor_id" />
             <generator class="identity" />
         </id>
-        <property name="type" type="string">
-            <column name="sensor_type" length="20" not-null="true" />
-        </property>
         <property name="channel" type="java.lang.Integer">
             <column name="sensor_channel" not-null="true" />
         </property>

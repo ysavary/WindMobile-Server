@@ -41,14 +41,6 @@ public class Sensor implements java.io.Serializable {
         this.id = id;
     }
 
-    public String getType() {
-        return this.type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public int getChannel() {
         return this.channel;
     }
