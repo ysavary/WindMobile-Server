@@ -60,9 +60,8 @@ public class ChatRoomListResource {
     }
 
     @GET
-    @Path("lastmessages")
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public MessageIds getLastMessageId(@QueryParam("chatRoomId") List<String> chatRoomIds) {
+    public MessageIds getLastMessageId(@QueryParam("chatroom") List<String> chatRoomIds) {
         try {
             ChatService chatService = serviceLocator.getService(ChatService.class);
             MessageIds returnValue = new MessageIds();
