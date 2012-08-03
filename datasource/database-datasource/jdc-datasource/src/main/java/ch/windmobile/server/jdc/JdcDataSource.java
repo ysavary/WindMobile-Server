@@ -442,7 +442,7 @@ public class JdcDataSource implements WindMobileDataSource {
         linearRegression.compute();
         double slope = linearRegression.getBeta1();
         double angle = Math.toDegrees(Math.atan(slope * getWindTrendScale()));
-        stationData.setWindTrend((int) angle);
+        stationData.setWindTrend((int) Math.round(angle));
 
         // Air temperature
         sensor = getSensorForChannel(station, Channel.airTemperature);
