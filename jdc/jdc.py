@@ -3,7 +3,7 @@ import pymongo
 
 connection = pymongo.Connection('localhost', 27017)
 db = connection.windmobile
-station_collection = db.stations
+stations_collection = db.stations
 
 result = requests.get("http://meteo.jdc.ch/API/?Action=StationView&flags=unactive|active|maintenance|test")
 for jdc_station in result.json['Stations']:
@@ -13,7 +13,7 @@ for jdc_station in result.json['Stations']:
                'name': jdc_station['name'],
                'shortname': jdc_station['shortname'],
                'last-measurements': jdc_station['last-measurements']}
-    station_collection.update({'_id': station_id}, station, True)
+    stations_collection.update({'_id': station_id}, station, True)
 
     # Asking 2 days of data
     result = requests.get(
@@ -21,9 +21,9 @@ for jdc_station in result.json['Stations']:
     if result.json['ERROR'] == 'OK':
         try:
             kwargs = {'capped': True, 'size': 500000, 'max': 5000}
-            values_collection = db.create_collection(station_id, **kwargs)
+            values_collection = db.create_collection("values_" + station_id, **kwargs)
         except pymongo.errors.CollectionInvalid:
-            values_collection = db[station_id]
+            values_collection = db["values_" + station_id]
 
         print(jdc_station['shortname'] + "(" + station_id + ") => " + str(
             len(result.json['data']['measurements'])) + " measurements")
