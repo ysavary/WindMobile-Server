@@ -17,7 +17,7 @@
 
         <property name="dataSources">
             <map>
-                <entry key="jdc" value-ref="jdcDataSource" />
+                <entry key="jdc" value-ref="jdcDataSource2" />
                 <entry key="windline" value-ref="windlineDataSource" />
             </map>
         </property>
@@ -27,14 +27,10 @@
     <bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
         <property name="beans">
             <map>
-                <entry key="Hibernate:name=JDC statistics" value-ref="jdcHibernateStatisticsBean" />
                 <entry key="Hibernate:name=Windline statistics" value-ref="windlineHibernateStatisticsBean" />
             </map>
         </property>
     </bean>
-
-    <!-- The REST service searches for this bean -->
-    <bean id="serviceLocator" class="ch.windmobile.server.social.mongodb.MongoDBServiceLocator" />
     
     <!--  Custom JAXB context resolver that enables the "natural" json generator -->
     <bean scope="singleton" class="ch.windmobile.server.config.CustomJAXBContextResolver" />

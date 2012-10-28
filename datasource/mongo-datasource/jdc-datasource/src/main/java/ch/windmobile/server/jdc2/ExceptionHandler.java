@@ -14,22 +14,21 @@
  * You should have received a copy of the GNU Affero General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package ch.windmobile.server.security;
+package ch.windmobile.server.jdc2;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.mongodb.MongoException;
 
-public class SecurityHelper {
+import ch.windmobile.server.datasourcemodel.DataSourceException;
+import ch.windmobile.server.datasourcemodel.DataSourceException.Error;
 
-    public static boolean hasRole(String role) {
-        boolean result = false;
-        for (GrantedAuthority authority : SecurityContextHolder.getContext().getAuthentication().getAuthorities()) {
-            String userRole = authority.getAuthority();
-            if (userRole.equals(role)) {
-                result = true;
-                break;
-            }
+public class ExceptionHandler {
+
+    static void treatException(Throwable e) throws DataSourceException {
+        if (e instanceof DataSourceException) {
+            throw (DataSourceException) e;
+        } else if (e instanceof MongoException) {
+            throw new DataSourceException(Error.DATABASE_ERROR, e);
         }
-        return result;
+        throw new DataSourceException(Error.SERVER_ERROR, e);
     }
 }

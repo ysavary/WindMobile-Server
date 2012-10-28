@@ -36,22 +36,12 @@
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-file-datasource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-jdc-datasource</artifactId>
+            <artifactId>windmobile-jdc-datasource2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
             <artifactId>windmobile-windline-datasource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-social</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -108,40 +98,6 @@
             <artifactId>spring-web</artifactId>
             <version>${org.springframework.version}</version>
             <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- REST Service security -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>${org.springframework.security.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>${org.springframework.security.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>${org.springframework.security.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
