@@ -32,7 +32,7 @@ def fetch_jdc_data():
         if result.json['ERROR'] == 'OK':
             try:
                 kwargs = {'capped': True, 'size': 500000, 'max': 5000}
-                values_collection = db.create_collection("values_" + station_id, **kwargs)
+                values_collection = db.create_collection("jdc_values_" + station_id, **kwargs)
             except pymongo.errors.CollectionInvalid:
                 values_collection = db["jdc_values_" + station_id]
 
