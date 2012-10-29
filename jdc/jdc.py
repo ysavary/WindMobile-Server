@@ -1,13 +1,23 @@
-from datetime import datetime
 import requests
 import pymongo
+
+from datetime import datetime
+import logging, logging.handlers
+
+logger = logging.getLogger('windmobile')
+# Limit file to 5Mb
+handler = logging.handlers.RotatingFileHandler('log/windmobile.log', maxBytes=5 * 10 ** 6)
+fmt = logging.Formatter('%(levelname)s %(asctime)s %(message)s', '%Y-%m-%dT%H:%M:%S%z')
+handler.setFormatter(fmt)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 connection = pymongo.Connection('localhost', 27017)
 db = connection.windmobile
 stations_collection = db.jdc_stations
 
 def fetch_jdc_data():
-    print("Processing JDC data...")
+    logger.info("Processing JDC data...")
     result = requests.get("http://meteo.jdc.ch/API/?Action=StationView&flags=unactive|active|maintenance|test")
 
     stations_collection.remove({})
@@ -48,8 +58,9 @@ def fetch_jdc_data():
 
             start_date = datetime.fromtimestamp(jdc_measurements[0]["unix-time"])
             end_date = datetime.fromtimestamp(jdc_measurements[-1]["unix-time"])
-            print(jdc_station['shortname'] + "(" + station_id + ") => " + str(
-                len(jdc_measurements)) + " values from " + str(start_date) + " to " + str(end_date))
+            logger.info("--> from " + start_date.strftime('%Y-%m-%dT%H:%M:%S') + " to " + end_date.strftime(
+                '%Y-%m-%dT%H:%M:%S') + ", " + jdc_station['shortname'] + "(" + station_id + "): " + str(len(
+                jdc_measurements)) + " values inserted")
 
 # Fetch data
 fetch_jdc_data()
