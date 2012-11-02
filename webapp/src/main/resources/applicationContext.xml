@@ -7,7 +7,7 @@
     <import resource="classpath:ch/windmobile/server/jdc/datasource.xml" />
     <import resource="classpath:ch/windmobile/server/windline/datasource.xml" />
 
-    <context:property-placeholder location="classpath:jdc-datasource.properties,classpath:windline-datasource.properties" />
+    <context:property-placeholder location="classpath:windline-datasource.properties" />
     
     <!-- The REST service searches for this bean -->
     <bean id="dataSource" class="ch.windmobile.server.datasourcemodel.AggregatedDataSource">

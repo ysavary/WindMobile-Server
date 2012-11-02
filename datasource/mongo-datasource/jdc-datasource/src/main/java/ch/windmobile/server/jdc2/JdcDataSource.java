@@ -50,10 +50,10 @@ import com.mongodb.Mongo;
 public class JdcDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected static final String UNACTIVE = "unactive";
+    protected static final String OFFLINE = "offline";
     protected static final String MAINTENANCE = "maintenance";
     protected static final String TEST = "test";
-    protected static final String ACTIVE = "active";
+    protected static final String ONLINE = "online";
 
     // 1 hour by default
     private int historicDuration = 60 * 60;
@@ -173,7 +173,7 @@ public class JdcDataSource implements WindMobileDataSource {
     }
 
     static protected Status getStationStatus(String status) {
-        if (UNACTIVE.equalsIgnoreCase(status) || MAINTENANCE.equalsIgnoreCase(status)) {
+        if (OFFLINE.equalsIgnoreCase(status) || MAINTENANCE.equalsIgnoreCase(status)) {
             return Status.RED;
         } else if (TEST.equalsIgnoreCase(status)) {
             return Status.ORANGE;
@@ -188,7 +188,7 @@ public class JdcDataSource implements WindMobileDataSource {
         // Red > 2h10 late
         DateTime redStatusLimit = expirationDate.plus(2 * 3600 * 1000 + 10 * 60 * 1000);
 
-        if ((UNACTIVE.equalsIgnoreCase(status) || MAINTENANCE.equalsIgnoreCase(status)) || (now.isAfter(redStatusLimit))) {
+        if ((OFFLINE.equalsIgnoreCase(status) || MAINTENANCE.equalsIgnoreCase(status)) || (now.isAfter(redStatusLimit))) {
             return Status.RED;
         } else if ((TEST.equalsIgnoreCase(status)) || (now.isAfter(orangeStatusLimit))) {
             return Status.ORANGE;
@@ -220,11 +220,11 @@ public class JdcDataSource implements WindMobileDataSource {
 
             List<String> list = new ArrayList<String>();
             if (allStation == true) {
-                list.add("maintenance");
-                list.add("test");
-                list.add("active");
+                list.add(MAINTENANCE);
+                list.add(TEST);
+                list.add(ONLINE);
             } else {
-                list.add("active");
+                list.add(ONLINE);
             }
             DBObject query = BasicDBObjectBuilder.start("status", new BasicDBObject("$in", list)).get();
             DBCursor cursor = stations.find(query);
