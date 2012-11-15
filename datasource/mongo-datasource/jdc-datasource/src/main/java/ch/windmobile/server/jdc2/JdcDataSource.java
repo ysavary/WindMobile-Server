@@ -50,11 +50,6 @@ import com.mongodb.Mongo;
 public class JdcDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected static final String OFFLINE = "offline";
-    protected static final String MAINTENANCE = "maintenance";
-    protected static final String TEST = "test";
-    protected static final String ONLINE = "online";
-
     // 1 hour by default
     private int historicDuration = 60 * 60;
     private int windTrendScale = 500000;
@@ -172,25 +167,15 @@ public class JdcDataSource implements WindMobileDataSource {
         return expirationDate.toDateTime();
     }
 
-    static protected Status getStationStatus(String status) {
-        if (OFFLINE.equalsIgnoreCase(status) || MAINTENANCE.equalsIgnoreCase(status)) {
-            return Status.RED;
-        } else if (TEST.equalsIgnoreCase(status)) {
-            return Status.ORANGE;
-        } else {
-            return Status.GREEN;
-        }
-    }
-
     static protected Status getDataStatus(String status, DateTime now, DateTime expirationDate) {
         // Orange > 10 minutes late
         DateTime orangeStatusLimit = expirationDate.plus(10 * 60 * 1000);
         // Red > 2h10 late
         DateTime redStatusLimit = expirationDate.plus(2 * 3600 * 1000 + 10 * 60 * 1000);
 
-        if ((OFFLINE.equalsIgnoreCase(status) || MAINTENANCE.equalsIgnoreCase(status)) || (now.isAfter(redStatusLimit))) {
+        if (Status.RED.value().equalsIgnoreCase(status) || now.isAfter(redStatusLimit)) {
             return Status.RED;
-        } else if ((TEST.equalsIgnoreCase(status)) || (now.isAfter(orangeStatusLimit))) {
+        } else if (Status.ORANGE.value().equalsIgnoreCase(status) || now.isAfter(orangeStatusLimit)) {
             return Status.ORANGE;
         } else {
             return Status.GREEN;
@@ -201,14 +186,14 @@ public class JdcDataSource implements WindMobileDataSource {
         StationInfo stationInfo = new StationInfo();
 
         stationInfo.setId(stationJson.getString("_id"));
-        stationInfo.setShortName(stationJson.getString("shortname"));
+        stationInfo.setShortName(stationJson.getString("short-name"));
         stationInfo.setName(stationJson.getString("name"));
         stationInfo.setDataValidity(getDataValidity(new DateTime()));
         stationInfo.setStationLocationType(StationLocationType.TAKEOFF);
         stationInfo.setWgs84Latitude(stationJson.getDouble("latitude"));
         stationInfo.setWgs84Longitude(stationJson.getDouble("longitude"));
         stationInfo.setAltitude(stationJson.getInt("altitude"));
-        stationInfo.setMaintenanceStatus(getStationStatus(stationJson.getString("status")));
+        stationInfo.setMaintenanceStatus(Status.fromValue(stationJson.getString("status")));
 
         return stationInfo;
     }
@@ -220,11 +205,11 @@ public class JdcDataSource implements WindMobileDataSource {
 
             List<String> list = new ArrayList<String>();
             if (allStation == true) {
-                list.add(MAINTENANCE);
-                list.add(TEST);
-                list.add(ONLINE);
+                list.add(Status.RED.value());
+                list.add(Status.ORANGE.value());
+                list.add(Status.GREEN.value());
             } else {
-                list.add(ONLINE);
+                list.add(Status.GREEN.value());
             }
             DBObject query = BasicDBObjectBuilder.start("status", new BasicDBObject("$in", list)).get();
             DBCursor cursor = stations.find(query);
