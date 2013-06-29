@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,6 @@ import ch.windmobile.server.datasourcemodel.xml.StationLocationType;
 import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 import ch.windmobile.server.datasourcemodel.xml.Status;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
@@ -86,20 +84,24 @@ public class JdcDataSource implements WindMobileDataSource {
         database = mongoService.getDB("windmobile");
     }
 
+    private String getProvider() {
+        return "jdc.ch";
+    }
+
     private String getStationsCollectionName() {
-        return "jdc_stations";
+        return "stations";
     }
 
     private String getDataCollectionName(String stationId) {
-        return "jdc_values_" + stationId;
+        return stationId;
     }
 
     private DateTime getLastUpdateDateTime(String stationId) {
         DBCollection stations = database.getCollection(getStationsCollectionName());
         DBObject stationJson = stations.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
-        BasicDBObject lastDataJson = (BasicDBObject) ((BasicDBList) stationJson.get("last-measurements")).get(0);
+        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last-measure");
 
-        return ISODateTimeFormat.dateTimeNoMillis().parseDateTime(lastDataJson.getString("date"));
+        return new DateTime(lastDataJson.getLong("_id") * 1000);
     }
 
     private List<DBObject> getHistoricData(DBCollection collection, DateTime lastUpdate, int duration) {
@@ -212,7 +214,7 @@ public class JdcDataSource implements WindMobileDataSource {
             } else {
                 list.add(Status.GREEN.value());
             }
-            DBObject query = BasicDBObjectBuilder.start("status", new BasicDBObject("$in", list)).get();
+            DBObject query = BasicDBObjectBuilder.start("provider", getProvider()).add("status", new BasicDBObject("$in", list)).get();
             DBCursor cursor = stations.find(query);
 
             List<StationInfo> stationInfoList = new ArrayList<StationInfo>();
@@ -252,7 +254,7 @@ public class JdcDataSource implements WindMobileDataSource {
     private StationData createStationData(String stationId) {
         DBCollection stations = database.getCollection(getStationsCollectionName());
         BasicDBObject stationJson = (BasicDBObject) stations.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
-        BasicDBObject lastDataJson = (BasicDBObject) ((BasicDBList) stationJson.get("last-measurements")).get(0);
+        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last-measure");
 
         StationData stationData = new StationData();
         stationData.setStationId(stationId);
