@@ -178,6 +178,7 @@ public class JdcDataSource implements WindMobileDataSource {
         } else if (Status.ORANGE.value().equalsIgnoreCase(status) || now.isAfter(orangeStatusLimit)) {
             return Status.ORANGE;
         } else {
+            // Handle case when data received are in the future
             return Status.GREEN;
         }
     }
@@ -271,43 +272,45 @@ public class JdcDataSource implements WindMobileDataSource {
         // Wind max
         stationData.setWindMax((float) lastDataJson.getDouble(DataTypeConstant.windMax.getJsonKey()));
 
-        // Wind direction chart
         List<DBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, getHistoricDuration());
-        Serie windDirectionSerie = createSerie(datas, DataTypeConstant.windDirection.getJsonKey());
-        windDirectionSerie.setName(DataTypeConstant.windDirection.getName());
-        Chart windDirectionChart = new Chart();
-        windDirectionChart.setDuration(getHistoricDuration());
-        windDirectionChart.getSeries().add(windDirectionSerie);
-        stationData.setWindDirectionChart(windDirectionChart);
+        if (datas.size() > 0) {
+            // Wind direction chart
+            Serie windDirectionSerie = createSerie(datas, DataTypeConstant.windDirection.getJsonKey());
+            windDirectionSerie.setName(DataTypeConstant.windDirection.getName());
+            Chart windDirectionChart = new Chart();
+            windDirectionChart.setDuration(getHistoricDuration());
+            windDirectionChart.getSeries().add(windDirectionSerie);
+            stationData.setWindDirectionChart(windDirectionChart);
 
-        // Wind history min/average
-        double minValue = Double.MAX_VALUE;
-        double maxValue = Double.MIN_VALUE;
-        double sum = 0;
-        double[][] windTrendMaxDatas = new double[datas.size()][2];
-        // double[][] windTrendAverageDatas = new double[windAverageDatas.size()][2];
-        for (int i = 0; i < datas.size(); i++) {
-            DBObject data = datas.get(i);
-            // JDC unix-time is in seconds, windmobile java-time in millis
-            long millis = ((Number) data.get("_id")).longValue() * 1000;
-            double windAverage = ((Number) data.get(DataTypeConstant.windAverage.getJsonKey())).doubleValue();
-            double windMax = ((Number) data.get(DataTypeConstant.windMax.getJsonKey())).doubleValue();
-            minValue = Math.min(minValue, windAverage);
-            maxValue = Math.max(maxValue, windMax);
-            sum += windAverage;
-            windTrendMaxDatas[i][0] = millis;
-            windTrendMaxDatas[i][1] = windMax;
+            // Wind history min/average
+            double minValue = Double.MAX_VALUE;
+            double maxValue = Double.MIN_VALUE;
+            double sum = 0;
+            double[][] windTrendMaxDatas = new double[datas.size()][2];
+            // double[][] windTrendAverageDatas = new double[windAverageDatas.size()][2];
+            for (int i = 0; i < datas.size(); i++) {
+                DBObject data = datas.get(i);
+                // JDC unix-time is in seconds, windmobile java-time in millis
+                long millis = ((Number) data.get("_id")).longValue() * 1000;
+                double windAverage = ((Number) data.get(DataTypeConstant.windAverage.getJsonKey())).doubleValue();
+                double windMax = ((Number) data.get(DataTypeConstant.windMax.getJsonKey())).doubleValue();
+                minValue = Math.min(minValue, windAverage);
+                maxValue = Math.max(maxValue, windMax);
+                sum += windAverage;
+                windTrendMaxDatas[i][0] = millis;
+                windTrendMaxDatas[i][1] = windMax;
+            }
+            stationData.setWindHistoryMin((float) minValue);
+            stationData.setWindHistoryAverage((float) (sum / datas.size()));
+            stationData.setWindHistoryMax((float) maxValue);
+
+            // Wind trend
+            LinearRegression linearRegression = new LinearRegression(windTrendMaxDatas);
+            linearRegression.compute();
+            double slope = linearRegression.getBeta1();
+            double angle = Math.toDegrees(Math.atan(slope * getWindTrendScale()));
+            stationData.setWindTrend((int) Math.round(angle));
         }
-        stationData.setWindHistoryMin((float) minValue);
-        stationData.setWindHistoryAverage((float) (sum / datas.size()));
-        stationData.setWindHistoryMax((float) maxValue);
-
-        // Wind trend
-        LinearRegression linearRegression = new LinearRegression(windTrendMaxDatas);
-        linearRegression.compute();
-        double slope = linearRegression.getBeta1();
-        double angle = Math.toDegrees(Math.atan(slope * getWindTrendScale()));
-        stationData.setWindTrend((int) Math.round(angle));
 
         // Air temperature
         stationData.setAirTemperature((float) lastDataJson.getDouble(DataTypeConstant.airTemperature.getJsonKey()));
