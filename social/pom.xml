@@ -6,7 +6,6 @@
     <name>WindMobile :: Server :: Social</name>
     <description>WindMobile social server</description>
 
-    <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-social</artifactId>
     <packaging>jar</packaging>
 

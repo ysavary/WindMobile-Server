@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <import resource="classpath:ch/windmobile/server/jdc2/datasource.xml" />
+    <import resource="classpath:ch/windmobile/server/jdc/datasource.xml" />
     <import resource="classpath:ch/windmobile/server/windline/datasource.xml" />
 
     <context:property-placeholder location="classpath:windline-datasource.properties" />
@@ -17,17 +17,8 @@
 
         <property name="dataSources">
             <map>
-                <entry key="jdc" value-ref="jdcDataSource2" />
+                <entry key="jdc" value-ref="jdcDataSource" />
                 <entry key="windline" value-ref="windlineDataSource" />
-            </map>
-        </property>
-    </bean>
-
-    <!-- Enable hibernate statistics mbeans, check if hibernate.generate_statistics is set to true -->
-    <bean id="jmxExporter" class="org.springframework.jmx.export.MBeanExporter">
-        <property name="beans">
-            <map>
-                <entry key="Hibernate:name=Windline statistics" value-ref="windlineHibernateStatisticsBean" />
             </map>
         </property>
     </bean>

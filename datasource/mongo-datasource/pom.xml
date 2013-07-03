@@ -6,7 +6,6 @@
     <name>WindMobile :: Server :: Mongo datasource</name>
     <description>Contains all the MongoDB datasources</description>
 
-    <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-mongo-datasource</artifactId>
     <packaging>pom</packaging>
 
@@ -17,7 +16,9 @@
     </parent>
 
     <modules>
+        <module>mongo-datasource-model</module>
         <module>jdc-datasource</module>
+        <module>windline-datasource</module>
     </modules>
 
     <dependencies>

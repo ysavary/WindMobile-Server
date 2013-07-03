@@ -6,7 +6,6 @@
     <name>WindMobile :: Server :: Datasource model</name>
     <description>WindMobile stations XML model</description>
 
-    <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-datasource-model</artifactId>
     <packaging>jar</packaging>
 

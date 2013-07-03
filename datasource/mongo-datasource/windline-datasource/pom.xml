@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>WindMobile :: Server :: JDC datasource</name>
-    <description>WindMobile JDC database adaptor</description>
+    <description>WindMobile Windline database adaptor</description>
 
-    <artifactId>windmobile-jdc-datasource</artifactId>
+    <artifactId>windmobile-windline-datasource</artifactId>
     <packaging>jar</packaging>
 
     <parent>

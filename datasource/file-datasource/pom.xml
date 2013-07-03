@@ -6,7 +6,6 @@
     <name>WindMobile :: Server :: File datasource</name>
     <description>WindMobile file test adaptor</description>
 
-    <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-file-datasource</artifactId>
     <packaging>jar</packaging>
 

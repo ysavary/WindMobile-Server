@@ -6,7 +6,6 @@
     <name>WindMobile :: Server :: Datasource</name>
     <description>Contains all the datasources</description>
 
-    <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-datasource</artifactId>
     <packaging>pom</packaging>
 
@@ -17,7 +16,6 @@
     </parent>
 
     <modules>
-        <module>database-datasource</module>
         <module>mongo-datasource</module>
         <module>file-datasource</module>
     </modules>

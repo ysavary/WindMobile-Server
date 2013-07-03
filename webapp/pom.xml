@@ -6,7 +6,6 @@
     <name>WindMobile :: Server :: WAR</name>
     <description>WindMobile WAR</description>
 
-    <groupId>ch.windmobile</groupId>
     <artifactId>windmobile-war</artifactId>
     <packaging>war</packaging>
 
@@ -36,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>ch.windmobile</groupId>
-            <artifactId>windmobile-jdc-datasource2</artifactId>
+            <artifactId>windmobile-jdc-datasource</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
