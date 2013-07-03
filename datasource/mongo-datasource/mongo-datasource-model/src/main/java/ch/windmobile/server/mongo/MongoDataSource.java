@@ -213,7 +213,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
                 list.add(Status.GREEN.value());
             }
             DBObject query = BasicDBObjectBuilder.start("provider", getProvider()).add("status", new BasicDBObject("$in", list)).get();
-            DBCursor cursor = stations.find(query);
+            DBCursor cursor = stations.find(query).sort(new BasicDBObject("short-name", 1));
 
             List<StationInfo> stationInfoList = new ArrayList<StationInfo>();
             while (cursor.hasNext()) {
