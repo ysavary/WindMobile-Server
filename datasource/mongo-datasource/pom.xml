@@ -19,6 +19,7 @@
         <module>mongo-datasource-model</module>
         <module>jdc-datasource</module>
         <module>windline-datasource</module>
+        <module>ffvl-datasource</module>
     </modules>
 
     <dependencies>

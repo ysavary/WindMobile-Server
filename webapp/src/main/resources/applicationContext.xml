@@ -6,8 +6,7 @@
 
     <import resource="classpath:ch/windmobile/server/jdc/datasource.xml" />
     <import resource="classpath:ch/windmobile/server/windline/datasource.xml" />
-
-    <context:property-placeholder location="classpath:windline-datasource.properties" />
+    <import resource="classpath:ch/windmobile/server/ffvl/datasource.xml" />
     
     <!-- The REST service searches for this bean -->
     <bean id="dataSource" class="ch.windmobile.server.datasourcemodel.AggregatedDataSource">
@@ -19,6 +18,7 @@
             <map>
                 <entry key="jdc" value-ref="jdcDataSource" />
                 <entry key="windline" value-ref="windlineDataSource" />
+                <entry key="ffvl" value-ref="ffvlDataSource" />
             </map>
         </property>
     </bean>

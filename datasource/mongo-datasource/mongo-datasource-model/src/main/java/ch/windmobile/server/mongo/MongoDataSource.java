@@ -86,6 +86,10 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
     abstract protected String getProvider();
 
+    protected List<String> getStationsFilter() {
+        return null;
+    }
+
     private String getStationsCollectionName() {
         return "stations";
     }
@@ -218,7 +222,15 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             List<StationInfo> stationInfoList = new ArrayList<StationInfo>();
             while (cursor.hasNext()) {
                 try {
-                    stationInfoList.add(createStationInfo((BasicDBObject) cursor.next()));
+                    BasicDBObject stationJson = (BasicDBObject) cursor.next();
+                    if (getStationsFilter() != null) {
+                        String stationId = stationJson.getString("_id");
+                        if (getStationsFilter().contains(stationId)) {
+                            stationInfoList.add(createStationInfo(stationJson));
+                        }
+                    } else {
+                        stationInfoList.add(createStationInfo(stationJson));
+                    }
                 } catch (Exception e) {
                     log.warn("Station was ignored because:", e);
                 }
