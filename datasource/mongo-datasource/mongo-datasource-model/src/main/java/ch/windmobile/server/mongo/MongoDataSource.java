@@ -53,8 +53,8 @@ public abstract class MongoDataSource implements WindMobileDataSource {
     private int windTrendScale = 500000;
 
     static enum DataTypeConstant {
-        windDirection("wind-direction", "windDirection"), windAverage("wind-average", "windAverage"), windMax("wind-maximum", "windMax"), airTemperature(
-            "temperature", "airTemperature"), airHumidity("humidity", "airHumidity");
+        windDirection("w-dir", "windDirection"), windAverage("w-avg", "windAverage"), windMax("w-max", "windMax"), airTemperature("temp",
+            "airTemperature"), airHumidity("hum", "airHumidity");
 
         private final String jsonKey;
         private final String name;
@@ -101,19 +101,19 @@ public abstract class MongoDataSource implements WindMobileDataSource {
     private DateTime getLastUpdateDateTime(String stationId) {
         DBCollection stations = database.getCollection(getStationsCollectionName());
         DBObject stationJson = stations.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
-        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last-measure");
+        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last");
 
         return new DateTime(lastDataJson.getLong("_id") * 1000);
     }
 
-    private List<DBObject> getHistoricData(DBCollection collection, DateTime lastUpdate, int duration) {
+    private List<BasicDBObject> getHistoricData(DBCollection collection, DateTime lastUpdate, int duration) {
         long startTime = lastUpdate.getMillis() - duration * 1000;
         DBObject query = BasicDBObjectBuilder.start("_id", BasicDBObjectBuilder.start("$gte", startTime / 1000).get()).get();
 
-        List<DBObject> datas = new ArrayList<DBObject>();
+        List<BasicDBObject> datas = new ArrayList<BasicDBObject>();
         DBCursor cursor = collection.find(query);
         while (cursor.hasNext()) {
-            datas.add(cursor.next());
+            datas.add((BasicDBObject) cursor.next());
 
         }
         return datas;
@@ -191,13 +191,14 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         StationInfo stationInfo = new StationInfo();
 
         stationInfo.setId(stationJson.getString("_id"));
-        stationInfo.setShortName(stationJson.getString("short-name"));
+        stationInfo.setShortName(stationJson.getString("short"));
         stationInfo.setName(stationJson.getString("name"));
         stationInfo.setDataValidity(getDataValidity(new DateTime()));
         stationInfo.setStationLocationType(StationLocationType.TAKEOFF);
-        stationInfo.setWgs84Latitude(stationJson.getDouble("latitude"));
-        stationInfo.setWgs84Longitude(stationJson.getDouble("longitude"));
-        stationInfo.setAltitude(stationJson.getInt("altitude"));
+        BasicDBObject locationJson = (BasicDBObject) stationJson.get("loc");
+        stationInfo.setWgs84Latitude(locationJson.getDouble("lat"));
+        stationInfo.setWgs84Longitude(locationJson.getDouble("lon"));
+        stationInfo.setAltitude(stationJson.getInt("alt"));
         stationInfo.setMaintenanceStatus(Status.fromValue(stationJson.getString("status")));
 
         return stationInfo;
@@ -216,8 +217,8 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             } else {
                 list.add(Status.GREEN.value());
             }
-            DBObject query = BasicDBObjectBuilder.start("provider", getProvider()).add("status", new BasicDBObject("$in", list)).get();
-            DBCursor cursor = stations.find(query).sort(new BasicDBObject("short-name", 1));
+            DBObject query = BasicDBObjectBuilder.start("prov", getProvider()).add("status", new BasicDBObject("$in", list)).get();
+            DBCursor cursor = stations.find(query);
 
             List<StationInfo> stationInfoList = new ArrayList<StationInfo>();
             while (cursor.hasNext()) {
@@ -264,7 +265,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
     private StationData createStationData(String stationId) {
         DBCollection stations = database.getCollection(getStationsCollectionName());
         BasicDBObject stationJson = (BasicDBObject) stations.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
-        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last-measure");
+        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last");
 
         StationData stationData = new StationData();
         stationData.setStationId(stationId);
@@ -284,7 +285,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         // Wind max
         stationData.setWindMax((float) lastDataJson.getDouble(DataTypeConstant.windMax.getJsonKey()));
 
-        List<DBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, getHistoricDuration());
+        List<BasicDBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, getHistoricDuration());
         if (datas.size() > 0) {
             // Wind direction chart
             Serie windDirectionSerie = createSerie(datas, DataTypeConstant.windDirection.getJsonKey());
@@ -301,11 +302,11 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             double[][] windTrendMaxDatas = new double[datas.size()][2];
             // double[][] windTrendAverageDatas = new double[windAverageDatas.size()][2];
             for (int i = 0; i < datas.size(); i++) {
-                DBObject data = datas.get(i);
+                BasicDBObject data = datas.get(i);
                 // JDC unix-time is in seconds, windmobile java-time in millis
-                long millis = ((Number) data.get("_id")).longValue() * 1000;
-                double windAverage = ((Number) data.get(DataTypeConstant.windAverage.getJsonKey())).doubleValue();
-                double windMax = ((Number) data.get(DataTypeConstant.windMax.getJsonKey())).doubleValue();
+                long millis = data.getLong("_id") * 1000;
+                double windAverage = data.getDouble(DataTypeConstant.windAverage.getJsonKey());
+                double windMax = data.getDouble(DataTypeConstant.windMax.getJsonKey());
                 minValue = Math.min(minValue, windAverage);
                 maxValue = Math.max(maxValue, windMax);
                 sum += windAverage;
@@ -325,10 +326,10 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         }
 
         // Air temperature
-        stationData.setAirTemperature((float) lastDataJson.getDouble(DataTypeConstant.airTemperature.getJsonKey()));
+        stationData.setAirTemperature((float) lastDataJson.getDouble(DataTypeConstant.airTemperature.getJsonKey(), -1));
 
         // Air humidity
-        stationData.setAirHumidity((float) lastDataJson.getDouble(DataTypeConstant.airHumidity.getJsonKey()));
+        stationData.setAirHumidity((float) lastDataJson.getDouble(DataTypeConstant.airHumidity.getJsonKey(), -1));
 
         return stationData;
     }
@@ -338,12 +339,12 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         return createStationData(stationId);
     }
 
-    private Serie createSerie(List<DBObject> datas, String key) {
+    private Serie createSerie(List<BasicDBObject> datas, String key) {
         Serie serie = new Serie();
-        for (DBObject data : datas) {
+        for (BasicDBObject data : datas) {
             Point newPoint = new Point();
             // JDC unix-time is in seconds, windmobile java-time in millis
-            newPoint.setDate(((Number) data.get("_id")).longValue() * 1000);
+            newPoint.setDate(data.getLong("_id") * 1000);
             newPoint.setValue(((Number) data.get(key)).floatValue());
             serie.getPoints().add(newPoint);
         }
@@ -362,7 +363,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             DateTime expirationDate = getExpirationDate(now, lastUpdate);
             windChart.setExpirationDate(expirationDate);
 
-            List<DBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, duration);
+            List<BasicDBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, duration);
 
             // Wind historic chart
             Serie windAverageSerie = createSerie(datas, DataTypeConstant.windAverage.getJsonKey());

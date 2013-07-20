@@ -17,6 +17,8 @@
 package ch.windmobile.server.datasourcemodel;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +120,17 @@ public class AggregatedDataSource implements WindMobileDataSource {
                     log.warn("Could not get StationInfo list:", e);
                 }
             }
+
+            Collections.sort(aggregatedStationInfos, new Comparator<StationInfo>() {
+                @Override
+                public int compare(StationInfo stationInfo1, StationInfo stationInfo2) {
+                    try {
+                        return stationInfo1.getShortName().compareTo(stationInfo2.getShortName());
+                    } catch (Exception e) {
+                        return 0;
+                    }
+                }
+            });
             return aggregatedStationInfos;
         } catch (Exception e) {
             throw exceptionHandler(e);
