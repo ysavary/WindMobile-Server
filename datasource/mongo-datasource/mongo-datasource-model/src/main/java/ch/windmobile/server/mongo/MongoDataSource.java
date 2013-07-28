@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.windmobile.server.datasourcemodel.DataSourceException;
+import ch.windmobile.server.datasourcemodel.DataSourceException.Error;
 import ch.windmobile.server.datasourcemodel.LinearRegression;
 import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
 import ch.windmobile.server.datasourcemodel.xml.Chart;
@@ -44,6 +45,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 public abstract class MongoDataSource implements WindMobileDataSource {
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -73,6 +75,15 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         }
     }
 
+    protected static DataSourceException exceptionHandler(Throwable e) {
+        if (e instanceof DataSourceException) {
+            return (DataSourceException) e;
+        } else if (e instanceof MongoException) {
+            return new DataSourceException(Error.DATABASE_ERROR, e);
+        }
+        return new DataSourceException(Error.SERVER_ERROR, e);
+    }
+
     private Mongo mongoService;
     private DB database;
 
@@ -94,6 +105,16 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         return "stations";
     }
 
+    private BasicDBObject findStationJson(String stationId) throws DataSourceException {
+        DBCollection stationsCollection = database.getCollection(getStationsCollectionName());
+        BasicDBObject stationJson = (BasicDBObject) stationsCollection.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
+        if (stationJson != null) {
+            return stationJson;
+        } else {
+            throw new DataSourceException(DataSourceException.Error.INVALID_DATA, "Unable to find station with id '" + stationId + "'");
+        }
+    }
+
     private String getDataCollectionName(String stationId) {
         return stationId;
     }
@@ -106,12 +127,13 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         return new DateTime(lastDataJson.getLong("_id") * 1000);
     }
 
-    private List<BasicDBObject> getHistoricData(DBCollection collection, DateTime lastUpdate, int duration) {
+    private List<BasicDBObject> getHistoricData(String stationId, DateTime lastUpdate, int duration) {
+        DBCollection dataCollection = database.getCollection(getDataCollectionName(stationId));
         long startTime = lastUpdate.getMillis() - duration * 1000;
         DBObject query = BasicDBObjectBuilder.start("_id", BasicDBObjectBuilder.start("$gte", startTime / 1000).get()).get();
 
         List<BasicDBObject> datas = new ArrayList<BasicDBObject>();
-        DBCursor cursor = collection.find(query);
+        DBCursor cursor = dataCollection.find(query);
         while (cursor.hasNext()) {
             datas.add((BasicDBObject) cursor.next());
 
@@ -127,8 +149,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
             return returnObject;
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw exceptionHandler(e);
         }
     }
 
@@ -239,33 +260,22 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
             return stationInfoList;
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw exceptionHandler(e);
         }
     }
 
     @Override
     public StationInfo getStationInfo(String stationId) throws DataSourceException {
         try {
-            DBCollection stations = database.getCollection(getStationsCollectionName());
-            BasicDBObject query = (BasicDBObject) BasicDBObjectBuilder.start("_id", stationId).get();
-            BasicDBObject stationJson = (BasicDBObject) stations.findOne(query);
-
-            if (stationJson != null) {
-                return createStationInfo(stationJson);
-            } else {
-                throw new DataSourceException(DataSourceException.Error.INVALID_DATA, "Unable to find stationId '" + stationId + "'");
-            }
+            return createStationInfo(findStationJson(stationId));
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw exceptionHandler(e);
         }
     }
 
-    private StationData createStationData(String stationId) {
-        DBCollection stations = database.getCollection(getStationsCollectionName());
-        BasicDBObject stationJson = (BasicDBObject) stations.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
-        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last");
+    private StationData createStationData(String stationId) throws DataSourceException {
+        BasicDBObject stationJson = findStationJson(stationId);
+        BasicDBObject lastDataJson = (BasicDBObject) findStationJson(stationId).get("last");
 
         StationData stationData = new StationData();
         stationData.setStationId(stationId);
@@ -285,7 +295,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         // Wind max
         stationData.setWindMax((float) lastDataJson.getDouble(DataTypeConstant.windMax.getJsonKey()));
 
-        List<BasicDBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, getHistoricDuration());
+        List<BasicDBObject> datas = getHistoricData(stationId, lastUpdate, getHistoricDuration());
         if (datas.size() > 0) {
             // Wind direction chart
             Serie windDirectionSerie = createSerie(datas, DataTypeConstant.windDirection.getJsonKey());
@@ -363,7 +373,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             DateTime expirationDate = getExpirationDate(now, lastUpdate);
             windChart.setExpirationDate(expirationDate);
 
-            List<BasicDBObject> datas = getHistoricData(database.getCollection(getDataCollectionName(stationId)), lastUpdate, duration);
+            List<BasicDBObject> datas = getHistoricData(stationId, lastUpdate, duration);
 
             // Wind historic chart
             Serie windAverageSerie = createSerie(datas, DataTypeConstant.windAverage.getJsonKey());
@@ -379,8 +389,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
             return windChart;
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw exceptionHandler(e);
         }
     }
 
