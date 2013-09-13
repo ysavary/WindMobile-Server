@@ -56,9 +56,7 @@
                     printMethod="ch.windmobile.server.datasourcemodel.JaxbDataValueConverter.printDataValue" />
             </xs:appinfo>
         </xs:annotation>
-        <xs:restriction base="xs:float">
-            <xs:minInclusive value="0" />
-        </xs:restriction>
+        <xs:restriction base="xs:float" />
     </xs:simpleType>
 
     <xs:complexType name="StationUpdateTime">
@@ -113,6 +111,8 @@
                     <xs:element name="windHistoryMax" type="DataValue" />
                     <xs:element name="airTemperature" type="DataValue" />
                     <xs:element name="airHumidity" type="DataValue" />
+                    <xs:element name="airPressure" type="DataValue" />
+                    <xs:element name="rain" type="DataValue" />
                 </xs:all>
                 <xs:attribute name="stationId" type="xs:string" use="required" />
             </xs:extension>

@@ -56,7 +56,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
     static enum DataTypeConstant {
         windDirection("w-dir", "windDirection"), windAverage("w-avg", "windAverage"), windMax("w-max", "windMax"), airTemperature("temp",
-            "airTemperature"), airHumidity("hum", "airHumidity");
+            "airTemperature"), airHumidity("hum", "airHumidity"), airPressure("pres", "airPressure"), rain("rain", "rain");
 
         private final String jsonKey;
         private final String name;
@@ -337,6 +337,18 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
         // Air humidity
         stationData.setAirHumidity((float) lastDataJson.getDouble(DataTypeConstant.airHumidity.getJsonKey(), -1));
+        
+        // Air pressure
+        String key = DataTypeConstant.airPressure.getJsonKey();
+        if (lastDataJson.containsField(key)) {
+            stationData.setAirPressure((float) lastDataJson.getDouble(key));
+        }
+        
+        // Rain
+        key = DataTypeConstant.rain.getJsonKey();
+        if (lastDataJson.containsField(key)) {
+            stationData.setRain((float) lastDataJson.getDouble(key));
+        }
 
         return stationData;
     }
