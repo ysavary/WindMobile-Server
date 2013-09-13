@@ -119,11 +119,7 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         return stationId;
     }
 
-    private DateTime getLastUpdateDateTime(String stationId) {
-        DBCollection stations = database.getCollection(getStationsCollectionName());
-        DBObject stationJson = stations.findOne(BasicDBObjectBuilder.start("_id", stationId).get());
-        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last");
-
+    private DateTime getLastUpdateDateTime(BasicDBObject lastDataJson) {
         return new DateTime(lastDataJson.getLong("_id") * 1000);
     }
 
@@ -144,8 +140,9 @@ public abstract class MongoDataSource implements WindMobileDataSource {
     @Override
     public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException {
         try {
+            BasicDBObject lastDataJson = (BasicDBObject) findStationJson(stationId).get("last");
             StationUpdateTime returnObject = new StationUpdateTime();
-            returnObject.setLastUpdate(getLastUpdateDateTime(stationId));
+            returnObject.setLastUpdate(getLastUpdateDateTime(lastDataJson));
 
             return returnObject;
         } catch (Exception e) {
@@ -275,12 +272,12 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
     private StationData createStationData(String stationId) throws DataSourceException {
         BasicDBObject stationJson = findStationJson(stationId);
-        BasicDBObject lastDataJson = (BasicDBObject) findStationJson(stationId).get("last");
+        BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last");
 
         StationData stationData = new StationData();
         stationData.setStationId(stationId);
 
-        DateTime lastUpdate = getLastUpdateDateTime(stationId);
+        DateTime lastUpdate = getLastUpdateDateTime(lastDataJson);
         stationData.setLastUpdate(lastUpdate);
         DateTime now = new DateTime();
         DateTime expirationDate = getExpirationDate(now, lastUpdate);
@@ -367,7 +364,8 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             Chart windChart = new Chart();
             windChart.setStationId(stationId);
 
-            DateTime lastUpdate = getLastUpdateDateTime(stationId);
+            BasicDBObject lastDataJson = (BasicDBObject) findStationJson(stationId).get("last");
+            DateTime lastUpdate = getLastUpdateDateTime(lastDataJson);
             windChart.setLastUpdate(lastUpdate);
             DateTime now = new DateTime();
             DateTime expirationDate = getExpirationDate(now, lastUpdate);
