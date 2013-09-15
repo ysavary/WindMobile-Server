@@ -141,6 +141,9 @@ public abstract class MongoDataSource implements WindMobileDataSource {
     public StationUpdateTime getLastUpdate(String stationId) throws DataSourceException {
         try {
             BasicDBObject lastDataJson = (BasicDBObject) findStationJson(stationId).get("last");
+            if (lastDataJson == null) {
+                throw new DataSourceException(DataSourceException.Error.INVALID_DATA, "No last data for station '" + stationId + "'");
+            }
             StationUpdateTime returnObject = new StationUpdateTime();
             returnObject.setLastUpdate(getLastUpdateDateTime(lastDataJson));
 
@@ -273,6 +276,9 @@ public abstract class MongoDataSource implements WindMobileDataSource {
     private StationData createStationData(String stationId) throws DataSourceException {
         BasicDBObject stationJson = findStationJson(stationId);
         BasicDBObject lastDataJson = (BasicDBObject) stationJson.get("last");
+        if (lastDataJson == null) {
+            throw new DataSourceException(DataSourceException.Error.INVALID_DATA, "No last data for station '" + stationId + "'");
+        }
 
         StationData stationData = new StationData();
         stationData.setStationId(stationId);
@@ -337,13 +343,13 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
         // Air humidity
         stationData.setAirHumidity((float) lastDataJson.getDouble(DataTypeConstant.airHumidity.getJsonKey(), -1));
-        
+
         // Air pressure
         String key = DataTypeConstant.airPressure.getJsonKey();
         if (lastDataJson.containsField(key)) {
             stationData.setAirPressure((float) lastDataJson.getDouble(key));
         }
-        
+
         // Rain
         key = DataTypeConstant.rain.getJsonKey();
         if (lastDataJson.containsField(key)) {
@@ -355,7 +361,11 @@ public abstract class MongoDataSource implements WindMobileDataSource {
 
     @Override
     public StationData getStationData(String stationId) throws DataSourceException {
-        return createStationData(stationId);
+        try {
+            return createStationData(stationId);
+        } catch (Exception e) {
+            throw exceptionHandler(e);
+        }
     }
 
     private Serie createSerie(List<BasicDBObject> datas, String key) {
@@ -377,6 +387,9 @@ public abstract class MongoDataSource implements WindMobileDataSource {
             windChart.setStationId(stationId);
 
             BasicDBObject lastDataJson = (BasicDBObject) findStationJson(stationId).get("last");
+            if (lastDataJson == null) {
+                throw new DataSourceException(DataSourceException.Error.INVALID_DATA, "No last data for station '" + stationId + "'");
+            }
             DateTime lastUpdate = getLastUpdateDateTime(lastDataJson);
             windChart.setLastUpdate(lastUpdate);
             DateTime now = new DateTime();
