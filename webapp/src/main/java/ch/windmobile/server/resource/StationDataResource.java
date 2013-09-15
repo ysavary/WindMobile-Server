@@ -16,10 +16,10 @@
  *******************************************************************************/
 package ch.windmobile.server.resource;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
 import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
@@ -29,12 +29,12 @@ import com.sun.jersey.api.NotFoundException;
 
 public class StationDataResource {
     private WindMobileDataSource dataSource;
-    
+
     UriInfo uriInfo;
-    Request request;
+    HttpServletRequest request;
     String stationId;
 
-    public StationDataResource(UriInfo uriInfo, Request request, String stationId, WindMobileDataSource dataSource) {
+    public StationDataResource(UriInfo uriInfo, HttpServletRequest request, String stationId, WindMobileDataSource dataSource) {
         this.uriInfo = uriInfo;
         this.request = request;
         this.stationId = stationId;
@@ -42,7 +42,7 @@ public class StationDataResource {
     }
 
     @GET
-    @Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public StationData getStationData() {
         try {
             StationData stationData = dataSource.getStationData(stationId);
@@ -52,8 +52,7 @@ public class StationDataResource {
                 throw new NotFoundException("No such StationData with id '" + stationId + "'");
             }
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw ExceptionHandler.treatException(e, request);
         }
     }
 }

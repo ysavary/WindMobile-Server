@@ -16,10 +16,10 @@
  *******************************************************************************/
 package ch.windmobile.server.resource;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
 import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
@@ -31,10 +31,10 @@ public class StationInfoResource {
     private WindMobileDataSource dataSource;
 
     UriInfo uriInfo;
-    Request request;
+    HttpServletRequest request;
     String id;
 
-    public StationInfoResource(UriInfo uriInfo, Request request, String id, WindMobileDataSource dataSource) {
+    public StationInfoResource(UriInfo uriInfo, HttpServletRequest request, String id, WindMobileDataSource dataSource) {
         this.uriInfo = uriInfo;
         this.request = request;
         this.id = id;
@@ -52,8 +52,7 @@ public class StationInfoResource {
                 throw new NotFoundException("No such StationInfo with id '" + id + "'");
             }
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw ExceptionHandler.treatException(e, request);
         }
     }
 }

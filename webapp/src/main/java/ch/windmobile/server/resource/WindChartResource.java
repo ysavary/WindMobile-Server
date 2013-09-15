@@ -16,6 +16,7 @@
  *******************************************************************************/
 package ch.windmobile.server.resource;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,7 +24,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -45,7 +45,7 @@ public class WindChartResource {
     @Context
     UriInfo uriInfo;
     @Context
-    Request request;
+    HttpServletRequest request;
 
     @GET
     @Path("{stationId}/{duration}")
@@ -61,8 +61,7 @@ public class WindChartResource {
             }
             return dataSource.getWindChart(stationId, duration);
         } catch (Exception e) {
-            ExceptionHandler.treatException(e);
-            return null;
+            throw ExceptionHandler.treatException(e, request);
         }
     }
 }

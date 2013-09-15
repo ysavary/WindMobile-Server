@@ -16,10 +16,10 @@
  *******************************************************************************/
 package ch.windmobile.server.resource;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
 import ch.windmobile.server.datasourcemodel.WindMobileDataSource;
@@ -36,10 +36,10 @@ public class StationDataListResource {
     @Context
     UriInfo uriInfo;
     @Context
-    Request request;
+    HttpServletRequest request;
 
     @Path("{stationId}")
-    public StationDataResource getMain(@PathParam("stationId") String stationId) {
+    public StationDataResource getStationData(@PathParam("stationId") String stationId) {
         return new StationDataResource(uriInfo, request, stationId, dataSource);
     }
 }

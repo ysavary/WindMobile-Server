@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -43,20 +44,31 @@ public class ExceptionHandler {
         return "";
     }
 
-    private static void logError(Throwable e) {
-        if (e instanceof WebApplicationException) {
-            WebApplicationException web = (WebApplicationException) e;
-            log.error("WindMobile WebApplicationException(" + web.getResponse().getStatus() + "):", e);
+    public static String getFullURL(HttpServletRequest request) {
+        StringBuffer requestURL = request.getRequestURL();
+        String queryString = request.getQueryString();
+
+        if (queryString == null) {
+            return requestURL.toString();
         } else {
-            log.error("WindMobile Exception:", e);
+            return requestURL.append('?').append(queryString).toString();
         }
     }
 
-    public static void treatException(Throwable e) throws WebApplicationException {
-        logError(e);
+    private static void logException(WebApplicationException e, HttpServletRequest request) {
+        Object entity = e.getResponse().getEntity();
+        if (entity instanceof Error) {
+            log.error(getFullURL(request) + ": " + e.getResponse().getStatus() + " (" + ((Error) entity).getMessage() + ")", e);
+        } else {
+            log.error(getFullURL(request) + ": " + e.getResponse().getStatus(), e);
+        }
+    }
+
+    public static WebApplicationException treatException(Throwable e, HttpServletRequest request) {
+        WebApplicationException exception;
 
         if (e instanceof WebApplicationException) {
-            throw (WebApplicationException) e;
+            exception = (WebApplicationException) e;
         } else if (e instanceof DataSourceException) {
             DataSourceException dataSourceException = (DataSourceException) e;
 
@@ -88,7 +100,7 @@ public class ExceptionHandler {
                 break;
             }
 
-            throw new WebApplicationException(Response.status(httpStatus).entity(error).build());
+            exception = new WebApplicationException(Response.status(httpStatus).entity(error).build());
         } else {
             Error error = new Error();
             error.setCode(DataSourceException.Error.SERVER_ERROR.getCode());
@@ -99,7 +111,10 @@ public class ExceptionHandler {
             }
             error.setStacktrace(printStacktrace(e));
 
-            throw new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(error).build());
+            exception = new WebApplicationException(Response.status(Status.INTERNAL_SERVER_ERROR).entity(error).build());
         }
+
+        logException(exception, request);
+        return exception;
     }
 }
