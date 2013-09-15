@@ -58,7 +58,9 @@ public class ExceptionHandler {
     private static void logException(WebApplicationException e, HttpServletRequest request) {
         Object entity = e.getResponse().getEntity();
         if (entity instanceof Error) {
-            log.error(getFullURL(request) + ": " + e.getResponse().getStatus() + " (" + ((Error) entity).getMessage() + ")", e);
+            Error error = (Error) entity;
+            log.error(getFullURL(request) + ": " + e.getResponse().getStatus() + " (" + error.getCode() + ", " + error.getMessage() + ")\n"
+                + error.getStacktrace());
         } else {
             log.error(getFullURL(request) + ": " + e.getResponse().getStatus(), e);
         }
@@ -71,15 +73,21 @@ public class ExceptionHandler {
             exception = (WebApplicationException) e;
         } else if (e instanceof DataSourceException) {
             DataSourceException dataSourceException = (DataSourceException) e;
+            Throwable cause = dataSourceException.getCause();
 
             Error error = new Error();
             error.setCode(dataSourceException.getError().getCode());
             if (dataSourceException.getMessage() != null) {
                 error.setMessage(dataSourceException.getMessage());
-            } else if (dataSourceException.getCause() != null) {
-                error.setMessage(dataSourceException.getCause().getMessage());
+            } else if (cause != null) {
+                error.setMessage(cause.getMessage());
             }
-            error.setStacktrace(printStacktrace(dataSourceException));
+
+            if (cause != null) {
+                error.setStacktrace(printStacktrace(cause));
+            } else {
+                error.setStacktrace(printStacktrace(dataSourceException));
+            }
 
             Status httpStatus;
             switch (dataSourceException.getError()) {
