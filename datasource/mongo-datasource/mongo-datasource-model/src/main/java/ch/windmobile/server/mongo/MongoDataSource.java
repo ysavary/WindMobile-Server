@@ -38,6 +38,7 @@ import ch.windmobile.server.datasourcemodel.xml.StationLocationType;
 import ch.windmobile.server.datasourcemodel.xml.StationUpdateTime;
 import ch.windmobile.server.datasourcemodel.xml.Status;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
@@ -216,9 +217,9 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         stationInfo.setName(stationJson.getString("name"));
         stationInfo.setDataValidity(getDataValidity(new DateTime()));
         stationInfo.setStationLocationType(StationLocationType.TAKEOFF);
-        BasicDBObject locationJson = (BasicDBObject) stationJson.get("loc");
-        stationInfo.setWgs84Latitude(locationJson.getDouble("lat"));
-        stationInfo.setWgs84Longitude(locationJson.getDouble("lon"));
+        BasicDBList locationJson = (BasicDBList) stationJson.get("loc");
+        stationInfo.setWgs84Longitude((Double)locationJson.get(0));
+        stationInfo.setWgs84Latitude((Double)locationJson.get(1));;
         stationInfo.setAltitude(stationJson.getInt("alt"));
         stationInfo.setMaintenanceStatus(Status.fromValue(stationJson.getString("status")));
 
