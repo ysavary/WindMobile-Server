@@ -31,6 +31,7 @@ public class FfvlDataSource extends MongoDataSource {
     private static final List<String> filter = new ArrayList<String>();
     static {
         filter.add("ffvl-38");
+        filter.add("ffvl-120");
     }
 
     @Override

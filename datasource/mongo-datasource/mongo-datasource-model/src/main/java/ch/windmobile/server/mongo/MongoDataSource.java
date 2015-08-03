@@ -217,9 +217,10 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         stationInfo.setName(stationJson.getString("name"));
         stationInfo.setDataValidity(getDataValidity(new DateTime()));
         stationInfo.setStationLocationType(StationLocationType.TAKEOFF);
-        BasicDBList locationJson = (BasicDBList) stationJson.get("loc");
-        stationInfo.setWgs84Longitude((Double)locationJson.get(0));
-        stationInfo.setWgs84Latitude((Double)locationJson.get(1));;
+        BasicDBObject locationJson = (BasicDBObject) stationJson.get("loc");
+        BasicDBList coordinatesJson = (BasicDBList) locationJson.get("coordinates");
+        stationInfo.setWgs84Longitude((Double)coordinatesJson.get(0));
+        stationInfo.setWgs84Latitude((Double)coordinatesJson.get(1));;
         stationInfo.setAltitude(stationJson.getInt("alt"));
         stationInfo.setMaintenanceStatus(Status.fromValue(stationJson.getString("status")));
 
