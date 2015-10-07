@@ -25,7 +25,7 @@ public class FfvlDataSource extends MongoDataSource {
 
     @Override
     protected String getProvider() {
-        return "ffvl.fr";
+        return "ffvl";
     }
 
     private static final List<String> filter = new ArrayList<String>();

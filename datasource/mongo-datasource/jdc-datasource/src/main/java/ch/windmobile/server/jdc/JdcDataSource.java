@@ -22,6 +22,6 @@ public class JdcDataSource extends MongoDataSource {
 
     @Override
     protected String getProvider() {
-        return "jdc.ch";
+        return "jdc";
     }
 }

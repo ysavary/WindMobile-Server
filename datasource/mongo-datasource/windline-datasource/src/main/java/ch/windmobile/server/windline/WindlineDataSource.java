@@ -22,6 +22,6 @@ public class WindlineDataSource extends MongoDataSource {
 
     @Override
     protected String getProvider() {
-        return "windline.ch";
+        return "windline";
     }
 }
