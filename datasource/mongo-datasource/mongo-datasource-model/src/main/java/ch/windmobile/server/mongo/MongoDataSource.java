@@ -349,7 +349,10 @@ public abstract class MongoDataSource implements WindMobileDataSource {
         // Air pressure
         String key = DataTypeConstant.airPressure.getJsonKey();
         if (lastDataJson.containsField(key)) {
-            stationData.setAirPressure((float) lastDataJson.getDouble(key));
+            BasicDBObject pressure = ((BasicDBObject)lastDataJson.get(key));
+            if (pressure.containsField("qfe") && pressure.get("qfe") != null) {
+                stationData.setAirPressure((float) pressure.getDouble("qfe"));
+            }
         }
 
         // Rain
